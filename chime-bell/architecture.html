@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chime Bell System Architecture</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #ffffff;
+    color: #222;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh; padding: 30px;
+  }
+  h1 { font-size: 1.5rem; color: #1a1a2e; margin-bottom: 4px; }
+  .subtitle { font-size: 0.78rem; color: #888; margin-bottom: 28px; }
+
+  .diagram {
+    position: relative;
+    width: 1380px; height: 420px;
+    background: #fff;
+    border-radius: 16px;
+    border: 1.5px solid #dde;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+  }
+
+  /* Zones */
+  .zone {
+    position: absolute; border-radius: 12px;
+    border: 1.5px dashed; top: 14px; bottom: 14px;
+  }
+  .zone-label {
+    position: absolute; bottom: 10px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.55rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 2px;
+    white-space: nowrap;
+  }
+  .z-robot {
+    left: 12px; width: 210px;
+    border-color: #e0cccc; background: rgba(245,225,225,0.2);
+  }
+  .z-robot .zone-label { color: #8a6060; }
+  .z-cloud {
+    left: 234px; width: 580px;
+    border-color: #c8c8e8; background: rgba(220,220,245,0.15);
+  }
+  .z-cloud .zone-label { color: #6a6a9a; }
+  .z-field {
+    right: 12px; width: 550px;
+    border-color: #c8dcc8; background: rgba(220,240,220,0.25);
+  }
+  .z-field .zone-label { color: #6a8a6a; }
+
+  /* Cards */
+  .card {
+    position: absolute; border-radius: 12px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 10px 8px;
+    background: #fff;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.07);
+  }
+  .card img {
+    border-radius: 6px; margin-bottom: 6px;
+    filter: drop-shadow(0 1px 3px rgba(0,0,0,0.15));
+  }
+  .card-title {
+    font-size: 0.75rem; font-weight: 700;
+    line-height: 1.2; margin-bottom: 2px; color: #222;
+  }
+  .card-sub { font-size: 0.52rem; color: #888; line-height: 1.3; }
+  .card-badge {
+    font-size: 0.44rem; font-weight: 700;
+    margin-top: 5px; padding: 2px 8px;
+    border-radius: 4px; letter-spacing: 0.5px;
+  }
+
+  .c-robot {
+    left: 24px; top: 55px; width: 180px; height: 240px;
+    border: 1.5px solid #e0baba;
+  }
+  .c-robot .card-badge { background: #faeaea; color: #aa5544; }
+  .robot-inner {
+    display: flex; flex-direction: column; gap: 5px;
+    margin-top: 6px; width: 100%;
+  }
+  .robot-sub-card {
+    border: 1.5px solid #e8d4d4; border-radius: 6px;
+    padding: 5px 8px; background: #fff;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .robot-sub-icon { font-size: 0.9rem; flex-shrink: 0; }
+  .robot-sub-text { text-align: left; }
+  .robot-sub-title { font-size: 0.55rem; font-weight: 700; color: #8a5050; }
+  .robot-sub-desc { font-size: 0.42rem; color: #999; line-height: 1.2; margin-top: 1px; }
+  .robot-arrow-down { text-align: center; color: #d4b8b8; font-size: 0.75rem; line-height: 1; }
+
+  .c-bridge {
+    left: 310px; top: 55px; width: 155px; height: 200px;
+    border: 1.5px solid #c0c0e0;
+  }
+  .c-bridge .card-badge { background: #eeeef8; color: #5555aa; }
+
+  .c-bsm {
+    left: 555px; top: 55px; width: 155px; height: 200px;
+    border: 1.5px solid #a0c8e0;
+  }
+  .c-bsm .card-badge { background: #e4f0fa; color: #2a7aaa; }
+
+  .c-receiver {
+    left: 860px; top: 55px; width: 140px; height: 200px;
+    border: 1.5px solid #b8d0e0;
+  }
+  .c-receiver .card-badge { background: #e8f2fa; color: #3a7a9a; }
+
+  .c-chime {
+    left: 1130px; top: 55px; width: 130px; height: 200px;
+    border: 1.5px solid #c8b0e0;
+  }
+  .c-chime .card-badge { background: #f0e8fa; color: #7a55aa; }
+
+  /* SVG */
+  .arrows { position: absolute; inset: 0; pointer-events: none; }
+  .arr { fill: none; stroke-width: 2.5; stroke-linecap: round; }
+  .proto-label {
+    font-family: 'Courier New', monospace;
+    font-size: 12px; font-weight: 800;
+    text-anchor: middle;
+  }
+  .desc-label {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 10px; font-weight: 600;
+    text-anchor: middle;
+  }
+
+  /* Step circles */
+  .step-num {
+    position: absolute;
+    width: 24px; height: 24px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.65rem; font-weight: 900;
+    z-index: 5; border: 2px solid; background: #fff;
+  }
+
+  /* Note box */
+  .note-box {
+    position: absolute;
+    font-size: 0.48rem; color: #777;
+    background: #fafafa; border: 1px solid #e0e0e0;
+    border-radius: 6px; padding: 6px 10px;
+    line-height: 1.4; max-width: 200px;
+  }
+
+  .legend {
+    display: flex; gap: 28px; margin-top: 20px;
+    font-size: 0.65rem; color: #777;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-line { width: 30px; height: 3px; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<h1>Chime Bell System Architecture</h1>
+<p class="subtitle">Signal flow (reverse of Call Button): Robot → Bell Signal Bridge → Ethernet Receiver → Chime Bell</p>
+
+<div class="diagram">
+  <div class="zone z-robot"><div class="zone-label">Robot Fleet</div></div>
+  <div class="zone z-cloud"><div class="zone-label">Google Cloud Platform</div></div>
+  <div class="zone z-field"><div class="zone-label">On-Premise (Restaurant)</div></div>
+
+  <svg class="arrows" width="1380" height="420">
+    <defs>
+      <marker id="a1" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#aa5544"/></marker>
+      <marker id="a2" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#5555aa"/></marker>
+      <marker id="a3" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#3a7a9a"/></marker>
+      <marker id="a4" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#7a55aa"/></marker>
+    </defs>
+
+    <!-- ① Robot → Bridge (MQTT) -->
+    <line class="arr" x1="204" y1="155" x2="308" y2="155" stroke="#aa5544" marker-end="url(#a1)"/>
+    <text class="proto-label" x="256" y="145" fill="#aa5544">MQTT</text>
+    <text class="desc-label" x="256" y="173" fill="#999">Mission status topic</text>
+
+    <!-- ② Bridge → BSM (gRPC) - config lookup -->
+    <line class="arr" x1="388" y1="200" x2="388" y2="200" stroke="none"/>
+    <line class="arr" x1="465" y1="155" x2="553" y2="155" stroke="#5555aa" marker-end="url(#a2)" stroke-dasharray="6,3"/>
+    <text class="proto-label" x="509" y="145" fill="#5555aa">gRPC</text>
+    <text class="desc-label" x="509" y="173" fill="#999">Chime config lookup</text>
+
+    <!-- ③ Bridge → Receiver (TCP) -->
+    <line class="arr" x1="465" y1="185" x2="858" y2="185" stroke="#3a7a9a" marker-end="url(#a3)"/>
+    <text class="proto-label" x="662" y="175" fill="#3a7a9a">TCP</text>
+    <text class="desc-label" x="662" y="203" fill="#999">Send chime command</text>
+
+    <!-- ④ Receiver → Chime Bell (RF) -->
+    <line class="arr" x1="1000" y1="155" x2="1128" y2="155" stroke="#7a55aa" stroke-dasharray="4,3" marker-end="url(#a4)"/>
+    <text class="proto-label" x="1064" y="145" fill="#7a55aa">RF</text>
+    <text class="desc-label" x="1064" y="173" fill="#999">433MHz signal</text>
+  </svg>
+
+  <!-- Step numbers -->
+  <div class="step-num" style="left:16px; top:47px; color:#aa5544; border-color:#e0baba;">1</div>
+  <div class="step-num" style="left:302px; top:47px; color:#5555aa; border-color:#b0b0d8;">2</div>
+  <div class="step-num" style="left:852px; top:47px; color:#3a7a9a; border-color:#a0c8d8;">3</div>
+  <div class="step-num" style="left:1122px; top:47px; color:#7a55aa; border-color:#c8b0e0;">4</div>
+
+  <!-- Note -->
+  <div class="note-box" style="left:860px; top:280px;">
+    Chime bell rings only if the received RF signal ID matches a pre-registered ID on the device.
+  </div>
+
+  <!-- Cards -->
+
+  <!-- Robot (expanded with mission status) -->
+  <div class="card c-robot">
+    <img src="servi.png" alt="Servi" width="60">
+    <div class="card-title">Servi Robot</div>
+    <div class="robot-inner">
+      <div class="robot-sub-card">
+        <div class="robot-sub-icon">📡</div>
+        <div class="robot-sub-text">
+          <div class="robot-sub-title">Mission Status</div>
+          <div class="robot-sub-desc">Monitors navigation state<br>(departed / arrived)</div>
+        </div>
+      </div>
+      <div class="robot-arrow-down">↓</div>
+      <div class="robot-sub-card">
+        <div class="robot-sub-icon">📤</div>
+        <div class="robot-sub-text">
+          <div class="robot-sub-title">Publish MQTT</div>
+          <div class="robot-sub-desc">Send status event<br>to Bell Signal Bridge</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-badge">Bear Robotics</div>
+  </div>
+
+  <!-- Bridge -->
+  <div class="card c-bridge">
+    <div style="font-size:2.2rem; margin-bottom:6px;">🌉</div>
+    <div class="card-title">Bell Signal<br>Bridge</div>
+    <div class="card-sub">
+      Subscribe MQTT topic<br>
+      Lookup chime config<br>
+      Send TCP command<br>
+      to Ethernet receiver
+    </div>
+    <div class="card-badge">Compute Engine</div>
+  </div>
+
+  <!-- BSM (config only) -->
+  <div class="card c-bsm">
+    <div style="font-size:2.2rem; margin-bottom:2px;">🧠</div>
+    <div class="card-title">Bell Signal<br>Manager</div>
+    <div class="card-sub">
+      Chime bell config<br>
+      Which bell for which<br>
+      destination
+    </div>
+    <svg width="44" height="32" viewBox="0 0 44 32" style="margin-top:6px;">
+      <ellipse cx="22" cy="6" rx="18" ry="6" fill="#d0e4f4" stroke="#4a88bb" stroke-width="1.5"/>
+      <rect x="4" y="6" width="36" height="14" fill="#d0e4f4" stroke="none"/>
+      <line x1="4" y1="6" x2="4" y2="20" stroke="#4a88bb" stroke-width="1.5"/>
+      <line x1="40" y1="6" x2="40" y2="20" stroke="#4a88bb" stroke-width="1.5"/>
+      <ellipse cx="22" cy="20" rx="18" ry="6" fill="#d0e4f4" stroke="#4a88bb" stroke-width="1.5"/>
+    </svg>
+    <div style="font-size:0.48rem; font-weight:700; color:#2a6a9a; margin-top:1px;">MySQL</div>
+    <div class="card-badge">Cloud Run</div>
+  </div>
+
+  <!-- Ethernet Receiver -->
+  <div class="card c-receiver">
+    <img src="srt8200.png" alt="SRT-8200" width="92">
+    <div class="card-title">Receiver</div>
+    <div class="card-sub">Syscall SRT-8200</div>
+    <div class="card-badge">Ethernet</div>
+  </div>
+
+  <!-- Chime Bell -->
+  <div class="card c-chime">
+    <img src="srl300.png" alt="SRL-300" width="60">
+    <div class="card-title">Chime Bell</div>
+    <div class="card-sub">Syscall SRL-300<br>LED + Melody</div>
+    <div class="card-badge">RF Receiver</div>
+  </div>
+
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-line" style="background:#aa5544;"></div> MQTT (Robot→Bridge)</div>
+  <div class="legend-item"><div class="legend-line" style="background:#5555aa; border-top:1px dashed #5555aa;"></div> gRPC (Bridge→BSM, config)</div>
+  <div class="legend-item"><div class="legend-line" style="background:#3a7a9a;"></div> TCP (Bridge→Receiver)</div>
+  <div class="legend-item"><div class="legend-line" style="background:#7a55aa;"></div> RF 433MHz (Receiver→Chime)</div>
+</div>
+
+</body>
+</html>
