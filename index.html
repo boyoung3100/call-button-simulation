@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Call Button Robot Simulation</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #1a1a2e;
+    color: #eee;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh; padding: 20px;
+  }
+  h1 { font-size: 1.5rem; margin-bottom: 6px; color: #e0e0ff; }
+  .subtitle { font-size: 0.78rem; color: #888; margin-bottom: 16px; text-align: center; line-height: 1.5; }
+  .controls {
+    display: flex; gap: 12px; margin-bottom: 16px;
+    flex-wrap: wrap; justify-content: center;
+  }
+  .controls button {
+    padding: 8px 18px; border: none; border-radius: 8px;
+    font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-auto { background: #4a6cf7; color: #fff; }
+  .btn-auto:hover { background: #3a5ce5; }
+  .btn-auto.active { background: #f7584a; }
+  .btn-reset { background: #444; color: #ccc; }
+  .btn-reset:hover { background: #555; }
+
+  .floor {
+    position: relative; width: 1060px; height: 710px;
+    background: #16213e; border-radius: 16px;
+    border: 2px solid #2a2a4a; overflow: hidden;
+  }
+  .floor-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .floor-label {
+    position: absolute; top: 10px; left: 14px;
+    font-size: 0.6rem; color: #333;
+    text-transform: uppercase; letter-spacing: 2px;
+  }
+  .corridor {
+    position: absolute; left: 0; right: 0;
+    top: 160px; height: 240px;
+    background: rgba(255,255,255,0.012);
+  }
+
+  /* Home markers */
+  .home-marker {
+    position: absolute; width: 54px; height: 42px;
+    border: 2px dashed #2e3e5e; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 2px;
+    font-size: 0.5rem; color: #4a5a7a; background: #1a2540;
+  }
+  .home-marker .home-icon { font-size: 0.8rem; }
+
+  /* Tables */
+  .table {
+    position: absolute; width: 150px; height: 110px;
+    background: linear-gradient(145deg, #282848, #1e1e38);
+    border: 2px solid #3a3a5a; border-radius: 12px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .table.calling {
+    border-color: #f7584a;
+    box-shadow: 0 0 20px rgba(247,88,74,0.3);
+    animation: pulse-border 1.5s ease-in-out infinite;
+  }
+  .table.served {
+    border-color: #4af758;
+    box-shadow: 0 0 15px rgba(74,247,88,0.2);
+  }
+  @keyframes pulse-border {
+    0%,100% { box-shadow: 0 0 20px rgba(247,88,74,0.3); }
+    50% { box-shadow: 0 0 35px rgba(247,88,74,0.5); }
+  }
+  .table-name {
+    position: absolute; top: 10px; left: 50%;
+    transform: translateX(-50%); white-space: nowrap;
+    font-size: 0.75rem; color: #7777aa;
+  }
+  .table-chairs { position: absolute; width: 100%; height: 100%; }
+  .chair {
+    position: absolute; width: 18px; height: 18px;
+    background: #252545; border: 1.5px solid #3a3a5a; border-radius: 4px;
+  }
+  .chair.top { top: -22px; } .chair.bottom { bottom: -22px; }
+  .chair.t1 { left: 30px; } .chair.t2 { left: 66px; } .chair.t3 { left: 102px; }
+  .chair.b1 { left: 30px; } .chair.b2 { left: 66px; } .chair.b3 { left: 102px; }
+
+  /* Bussing call button on table */
+  .call-btn {
+    width: 34px; height: 34px; border-radius: 6px;
+    border: 1.5px solid #555; padding: 0;
+    background: #111; cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    position: absolute; bottom: 8px; left: 8px; overflow: hidden;
+  }
+  .call-btn img { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; }
+  .call-btn:hover { transform: scale(1.15); box-shadow: 0 3px 12px rgba(255,200,50,0.5); }
+  .call-btn:active { transform: scale(0.95); }
+  .call-btn.disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+  .call-btn.ringing { animation: ring-btn 0.5s ease-in-out infinite; box-shadow: 0 0 12px rgba(247,88,74,0.6); }
+  @keyframes ring-btn { 0%,100%{transform:rotate(0)} 25%{transform:rotate(4deg)} 75%{transform:rotate(-4deg)} }
+
+  .table-dishes {
+    position: absolute; top: 35px; right: 12px;
+    font-size: 1.1rem; opacity: 0; transition: opacity 0.3s;
+  }
+  .table-dishes.visible { opacity: 0.7; }
+  .bussing-label {
+    position: absolute; bottom: 10px; right: 8px;
+    font-size: 0.4rem; color: #665577; font-weight: bold;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+
+  /* Kitchen */
+  .kitchen {
+    position: absolute; left: 250px; bottom: 15px;
+    width: 520px; height: 100px;
+    background: linear-gradient(180deg, #1c2240, #181e38);
+    border: 2px solid #354060; border-radius: 10px;
+    display: flex; flex-direction: column; align-items: center;
+    padding-top: 8px; gap: 6px;
+  }
+  .kitchen-counter {
+    position: absolute; top: -2px; left: 40px; right: 40px;
+    height: 3px; background: #556080; border-radius: 2px;
+  }
+  .kitchen-label {
+    font-size: 0.65rem; font-weight: 700; color: #4a5a80;
+    letter-spacing: 2px; text-transform: uppercase;
+  }
+  .kitchen-btns {
+    display: flex; gap: 6px;
+  }
+
+
+  /* One-off point */
+  .oneoff-point {
+    position: absolute; width: 75px;
+    border: 2px dashed #4a6090; border-radius: 10px;
+    background: #1a2540; padding: 8px;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 5px;
+  }
+  .oneoff-label {
+    font-size: 0.45rem; color: #5a7aaa;
+    font-weight: bold; text-transform: uppercase; letter-spacing: 1px;
+  }
+
+  /* Robot */
+  .robot {
+    position: absolute; z-index: 10; pointer-events: none;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .robot-status {
+    font-size: 0.48rem; white-space: nowrap;
+    padding: 1px 5px; border-radius: 3px; font-weight: bold; margin-bottom: 2px;
+  }
+  .robot-status.idle { color: #6a6; background: rgba(50,120,50,0.25); }
+  .robot-status.moving { color: #fa0; background: rgba(200,150,0,0.25); }
+  .robot-status.serving { color: #5af; background: rgba(50,150,250,0.25); }
+  .robot-status.returning { color: #88f; background: rgba(80,80,200,0.25); }
+  .robot-status.stationed { color: #5a90cc; background: rgba(90,144,204,0.2); }
+
+  .servi-ring {
+    width: 48px; height: 48px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    border: 2.5px solid var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    background: rgba(0,0,0,0.15); position: relative;
+  }
+  .servi-img {
+    width: 44px; height: auto;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
+  }
+  .robot.moving .servi-img { animation: bob 0.6s ease-in-out infinite; }
+  @keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-2px)} }
+  .robot-label {
+    font-size: 0.48rem; white-space: nowrap;
+    font-weight: bold; margin-top: 2px; letter-spacing: 0.5px;
+  }
+
+  .carry-item {
+    position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
+    font-size: 1.3rem; z-index: 15;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+    animation: item-float 2s ease-in-out infinite;
+  }
+  @keyframes item-float {
+    0%,100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-3px); }
+  }
+
+  .pickup-btn {
+    margin-top: 2px; padding: 3px 8px;
+    border: 1.5px solid #b48af7; border-radius: 5px;
+    background: rgba(180,138,247,0.15); color: #b48af7;
+    font-size: 0.5rem; font-weight: bold;
+    cursor: pointer; pointer-events: auto; white-space: nowrap;
+    animation: pulse-pickup 1s ease-in-out infinite;
+  }
+  .pickup-btn:hover { background: rgba(180,138,247,0.35); transform: scale(1.1); }
+  @keyframes pulse-pickup {
+    0%,100% { box-shadow: 0 0 4px rgba(180,138,247,0.3); }
+    50% { box-shadow: 0 0 10px rgba(180,138,247,0.6); }
+  }
+
+  .path-line { position: absolute; pointer-events: none; z-index: 5; }
+
+  .log-panel {
+    width: 1060px; margin-top: 14px; background: #111; border-radius: 10px;
+    padding: 10px 14px; max-height: 150px; overflow-y: auto;
+    font-family: 'Courier New', monospace; font-size: 0.72rem; border: 1px solid #2a2a4a;
+  }
+  .log-entry { padding: 2px 0; border-bottom: 1px solid #1a1a2a; display: flex; gap: 10px; }
+  .log-time { color: #555; min-width: 70px; }
+  .log-msg { color: #aaa; }
+  .log-msg .hl { color: #f7a84a; } .log-msg .rn { color: #5af; }
+  .log-msg .tr { color: #e05050; } .log-msg .ok { color: #4af758; }
+  .log-msg .sv { color: #f8a856; } .log-msg .bs { color: #b48af7; }
+  .log-msg .oo { color: #5a90cc; }
+
+  .legend {
+    display: flex; gap: 14px; margin-top: 10px;
+    font-size: 0.63rem; color: #666; flex-wrap: wrap; justify-content: center;
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+</style>
+</head>
+<body>
+
+<h1>Call Button Robot Simulation</h1>
+<p class="subtitle">
+  🧹 <b>Bussing</b>: Table calls for dish pickup &nbsp;|&nbsp;
+  📍 <b>One-off</b>: Kitchen calls robot to stand by
+</p>
+
+<div class="controls">
+  <button class="btn-auto" id="autoBtn" onclick="toggleAuto()">Start Auto Mode</button>
+  <button class="btn-reset" onclick="resetAll()">Reset</button>
+</div>
+
+<div class="floor">
+  <div class="floor-grid"></div>
+  <div class="floor-label">Restaurant Floor Plan</div>
+  <div class="corridor"></div>
+
+  <!-- Return points (dish drop-off, below kitchen) -->
+  <div class="home-marker" style="left:253px; top:650px;"><span class="home-icon">🍽️</span>A</div>
+  <div class="home-marker" style="left:403px; top:650px;"><span class="home-icon">🍽️</span>B</div>
+  <div class="home-marker" style="left:553px; top:650px;"><span class="home-icon">🍽️</span>C</div>
+  <div class="home-marker" style="left:703px; top:650px;"><span class="home-icon">🍽️</span>D</div>
+
+  <!-- Row 1 Tables (bussing call buttons) -->
+  <div class="table" id="tbl0" style="left:210px; top:50px;">
+    <div class="table-name">Table 1</div>
+    <div class="table-chairs"><div class="chair top t1"></div><div class="chair top t2"></div><div class="chair top t3"></div><div class="chair bottom b1"></div><div class="chair bottom b2"></div><div class="chair bottom b3"></div></div>
+    <div class="table-dishes" id="dishes0">🍽️</div>
+    <div class="bussing-label">BUSSING</div>
+    <button class="call-btn" id="btn0" onclick="callBussing(0)"><img src="st800.jpg" alt="ST-800"></button>
+  </div>
+  <div class="table" id="tbl1" style="left:425px; top:50px;">
+    <div class="table-name">Table 2</div>
+    <div class="table-chairs"><div class="chair top t1"></div><div class="chair top t2"></div><div class="chair top t3"></div><div class="chair bottom b1"></div><div class="chair bottom b2"></div><div class="chair bottom b3"></div></div>
+    <div class="table-dishes" id="dishes1">🍽️</div>
+    <div class="bussing-label">BUSSING</div>
+    <button class="call-btn" id="btn1" onclick="callBussing(1)"><img src="st800.jpg" alt="ST-800"></button>
+  </div>
+  <div class="table" id="tbl2" style="left:640px; top:50px;">
+    <div class="table-name">Table 3</div>
+    <div class="table-chairs"><div class="chair top t1"></div><div class="chair top t2"></div><div class="chair top t3"></div><div class="chair bottom b1"></div><div class="chair bottom b2"></div><div class="chair bottom b3"></div></div>
+    <div class="table-dishes" id="dishes2">🍽️</div>
+    <div class="bussing-label">BUSSING</div>
+    <button class="call-btn" id="btn2" onclick="callBussing(2)"><img src="st800.jpg" alt="ST-800"></button>
+  </div>
+  <!-- Row 2 Tables -->
+  <div class="table" id="tbl3" style="left:210px; top:400px;">
+    <div class="table-name">Table 4</div>
+    <div class="table-chairs"><div class="chair top t1"></div><div class="chair top t2"></div><div class="chair top t3"></div><div class="chair bottom b1"></div><div class="chair bottom b2"></div><div class="chair bottom b3"></div></div>
+    <div class="table-dishes" id="dishes3">🍽️</div>
+    <div class="bussing-label">BUSSING</div>
+    <button class="call-btn" id="btn3" onclick="callBussing(3)"><img src="st800.jpg" alt="ST-800"></button>
+  </div>
+  <div class="table" id="tbl4" style="left:425px; top:400px;">
+    <div class="table-name">Table 5</div>
+    <div class="table-chairs"><div class="chair top t1"></div><div class="chair top t2"></div><div class="chair top t3"></div><div class="chair bottom b1"></div><div class="chair bottom b2"></div><div class="chair bottom b3"></div></div>
+    <div class="table-dishes" id="dishes4">🍽️</div>
+    <div class="bussing-label">BUSSING</div>
+    <button class="call-btn" id="btn4" onclick="callBussing(4)"><img src="st800.jpg" alt="ST-800"></button>
+  </div>
+  <div class="table" id="tbl5" style="left:640px; top:400px;">
+    <div class="table-name">Table 6</div>
+    <div class="table-chairs"><div class="chair top t1"></div><div class="chair top t2"></div><div class="chair top t3"></div><div class="chair bottom b1"></div><div class="chair bottom b2"></div><div class="chair bottom b3"></div></div>
+    <div class="table-dishes" id="dishes5">🍽️</div>
+    <div class="bussing-label">BUSSING</div>
+    <button class="call-btn" id="btn5" onclick="callBussing(5)"><img src="st800.jpg" alt="ST-800"></button>
+  </div>
+
+  <!-- Kitchen -->
+  <div class="kitchen" id="kitchenArea">
+    <div class="kitchen-counter"></div>
+    <div class="kitchen-label">🍳 Kitchen</div>
+  </div>
+
+  <!-- One-off point (right side) -->
+  <div class="oneoff-point" style="left:955px; top:250px;">
+    <div class="oneoff-label">📍 One-off</div>
+    <button class="call-btn" id="oneoffBtn" onclick="callOneoff()" style="position:relative; bottom:auto; left:auto; width:30px; height:30px;">
+      <img src="st800.jpg" alt="ST-800">
+    </button>
+  </div>
+
+  <!-- 4 Servi Robots -->
+  <div class="robot" id="robot0">
+    <div class="robot-status idle">Idle</div>
+    <div class="servi-ring" style="--accent:#4de8c2;"><img class="servi-img" src="servi.png" alt="Servi"></div>
+    <div class="robot-label" style="color:#4de8c2;">Servi A</div>
+  </div>
+  <div class="robot" id="robot1">
+    <div class="robot-status idle">Idle</div>
+    <div class="servi-ring" style="--accent:#f8a856;"><img class="servi-img" src="servi.png" alt="Servi"></div>
+    <div class="robot-label" style="color:#f8a856;">Servi B</div>
+  </div>
+  <div class="robot" id="robot2">
+    <div class="robot-status idle">Idle</div>
+    <div class="servi-ring" style="--accent:#b48af7;"><img class="servi-img" src="servi.png" alt="Servi"></div>
+    <div class="robot-label" style="color:#b48af7;">Servi C</div>
+  </div>
+  <div class="robot" id="robot3">
+    <div class="robot-status idle">Idle</div>
+    <div class="servi-ring" style="--accent:#ff6b9d;"><img class="servi-img" src="servi.png" alt="Servi"></div>
+    <div class="robot-label" style="color:#ff6b9d;">Servi D</div>
+  </div>
+
+  <svg class="path-line" id="pathSvg" width="1060" height="710" style="position:absolute;top:0;left:0;"></svg>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#b48af7;"></div> Bussing</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#5a90cc;"></div> One-off (Kitchen)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#4de8c2;border-radius:3px;"></div> A</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#f8a856;border-radius:3px;"></div> B</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#b48af7;border-radius:3px;"></div> C</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ff6b9d;border-radius:3px;"></div> D</div>
+</div>
+
+<div class="log-panel" id="logPanel"></div>
+
+<script>
+/* ── Layout ── */
+const TBL_W = 150, TBL_H = 110, BELL_DX = 23, STOP_GAP = 35;
+const ROW1_Y = 50, ROW2_Y = 400, COL_X = [210, 425, 640];
+// 4 corridor lanes to avoid overlap:
+// Row1 tables (top): robots use lanes closer to row1
+// Row2 tables (bottom): robots use lanes closer to row2
+const CY_ROW1_A = 230, CY_ROW1_B = 250; // upper lanes for top tables
+const CY_ROW2_A = 310, CY_ROW2_B = 330; // lower lanes for bottom tables
+function corridorY(ri, tableIdx) {
+  const toRow2 = tableIdx !== undefined && tableIdx >= 3;
+  if (toRow2) return (ri <= 1) ? CY_ROW2_A : CY_ROW2_B;
+  return (ri <= 1) ? CY_ROW1_A : CY_ROW1_B;
+}
+
+const TABLES = [];
+for (let r=0;r<2;r++) for (let c=0;c<3;c++) {
+  const i=r*3+c, tl=COL_X[c], tt=r===0?ROW1_Y:ROW2_Y;
+  TABLES.push({ id:i, el:'tbl'+i, btn:'btn'+i, dishes:'dishes'+i,
+    x:tl+BELL_DX, y:r===0?(tt+TBL_H+STOP_GAP):(tt-STOP_GAP), name:'Table '+(i+1) });
+}
+
+const ONEOFF = { x: 993, y: 285 }; // Right side
+
+const HOME = [
+  {x:280,y:675},{x:430,y:675},{x:580,y:675},{x:730,y:675}
+];
+const COLORS = ['#4de8c2','#f8a856','#b48af7','#ff6b9d'];
+const NAMES = ['Servi A','Servi B','Servi C','Servi D'];
+
+const robots = HOME.map((h,i) => ({
+  el:document.getElementById('robot'+i),
+  origX:h.x, origY:h.y, // never changes
+  homeX:h.x, homeY:h.y, // current return point
+  x:h.x, y:h.y,
+  state:'idle', target:null, callType:null,
+  path:[], pathIdx:0, color:COLORS[i], name:NAMES[i],
+}));
+
+const tableStates = TABLES.map(()=>({calling:false, served:false}));
+let autoMode=false, autoTimer=null;
+const SPEED=3, BUSSING_TIME=2000;
+
+/* ── Utilities ── */
+function log(m){
+  const p=document.getElementById('logPanel');
+  const t=new Date().toLocaleTimeString('en-US',{hour12:false});
+  const e=document.createElement('div'); e.className='log-entry';
+  e.innerHTML=`<span class="log-time">${t}</span><span class="log-msg">${m}</span>`;
+  p.prepend(e); if(p.children.length>60) p.removeChild(p.lastChild);
+}
+function positionRobots(){
+  robots.forEach(r=>{ r.el.style.left=(r.x-24)+'px'; r.el.style.top=(r.y-30)+'px'; });
+}
+function updateStatus(i,cls,txt){
+  const s=robots[i].el.querySelector('.robot-status');
+  s.className='robot-status '+cls; s.textContent=txt;
+}
+
+/* ── Carry items ── */
+function setCarry(ri,emoji){ removeCarry(ri); if(!emoji)return;
+  const d=document.createElement('div'); d.className='carry-item'; d.textContent=emoji;
+  robots[ri].el.querySelector('.servi-ring').appendChild(d);
+}
+function removeCarry(ri){ const o=robots[ri].el.querySelector('.carry-item'); if(o)o.remove(); }
+
+
+/* ── Return home ── */
+function goHome(ri,ct){
+  const rob=robots[ri];
+  rob.state='returning'; rob.callType=null;
+  rob.homeX=rob.origX; rob.homeY=rob.origY; // always return to original point
+  rob.path=calcPath(rob.x,rob.y,rob.origX,rob.origY,ri,rob.target); rob.pathIdx=0;
+  rob.el.classList.add('moving');
+  updateStatus(ri,'returning','Returning'); drawPath(ri);
+  if(ct!==undefined) setTimeout(()=>{
+    if(tableStates[ct].served){ tableStates[ct].served=false;
+      document.getElementById(TABLES[ct].el).classList.remove('served'); }
+  },3000);
+}
+
+/* ── Pickup button (bussing) ── */
+function showPickup(ri){
+  const old=robots[ri].el.querySelector('.pickup-btn'); if(old)old.remove();
+  const b=document.createElement('button'); b.className='pickup-btn';
+  b.textContent='🧹 Pick up'; b.onclick=()=>doPickup(ri);
+  robots[ri].el.querySelector('.robot-label').insertAdjacentElement('afterend',b);
+}
+function doPickup(ri){
+  const rob=robots[ri]; if(rob.state!=='serving')return;
+  const btn=rob.el.querySelector('.pickup-btn'); if(btn)btn.remove();
+  const ct=rob.target, tbl=TABLES[ct];
+  document.getElementById(tbl.dishes).classList.remove('visible');
+  setCarry(ri,'🍽️');
+  tableStates[ct].calling=false; tableStates[ct].served=true;
+  document.getElementById(tbl.el).classList.remove('calling');
+  document.getElementById(tbl.el).classList.add('served');
+  document.getElementById(tbl.btn).classList.remove('ringing','disabled');
+  log(`<span class="ok">${rob.name} 🧹 picked up dishes at ${tbl.name}</span>`);
+  goHome(ri,ct);
+}
+
+/* ── Path (avoid table zones, no crossing near kitchen) ── */
+// Each robot departs/arrives kitchen VERTICALLY at its own x.
+// Horizontal movement only in safe zones (below tables y=525+ or corridor y=230-330).
+// Robots A,B use LEFT edge (x=100), C,D use RIGHT edge (x=920).
+function calcPath(sx,sy,tx,ty,ri,tableIdx){
+  const cy=corridorY(ri,tableIdx), pts=[];
+  const SAFE_Y = [525,535,525,535][ri]; // slightly offset per robot pair
+  const edgeX = ri<=1 ? 100 : 920;
+  const CORR_BOT=405;
+
+  const startBelow = sy>CORR_BOT && sx>=200 && sx<=800;
+  const endBelow = ty>CORR_BOT && tx>=200 && tx<=800;
+
+  if(startBelow){
+    // Kitchen exit: straight UP to safe zone, then horizontal to edge, then up to corridor
+    pts.push({x:sx, y:SAFE_Y});
+    pts.push({x:edgeX, y:SAFE_Y});
+    pts.push({x:edgeX, y:cy});
+  } else {
+    if(Math.abs(sy-cy)>2) pts.push({x:sx, y:cy});
+  }
+
+  const last = pts.length ? pts[pts.length-1] : {x:sx,y:sy};
+
+  if(endBelow){
+    // Kitchen arrive: corridor to edge, down to safe zone, horizontal to own x, then DOWN
+    if(Math.abs(last.x-edgeX)>2) pts.push({x:edgeX, y:last.y});
+    pts.push({x:edgeX, y:SAFE_Y});
+    pts.push({x:tx, y:SAFE_Y});
+    pts.push({x:tx, y:ty});
+  } else {
+    if(Math.abs(last.x-tx)>2) pts.push({x:tx, y:last.y});
+    pts.push({x:tx, y:ty});
+  }
+  return pts;
+}
+function drawPath(idx){
+  const svg=document.getElementById('pathSvg');
+  let pl=svg.querySelector(`.path-r${idx}`);
+  const r=robots[idx];
+  if(!r.path.length||r.pathIdx>=r.path.length){if(pl)pl.remove();return;}
+  const pts=[[r.x,r.y]];
+  for(let i=r.pathIdx;i<r.path.length;i++) pts.push([r.path[i].x,r.path[i].y]);
+  if(!pl){ pl=document.createElementNS('http://www.w3.org/2000/svg','polyline');
+    pl.setAttribute('class',`path-r${idx}`); pl.setAttribute('fill','none');
+    pl.setAttribute('stroke',r.color); pl.setAttribute('stroke-width','2');
+    pl.setAttribute('stroke-dasharray','6,4'); pl.setAttribute('stroke-opacity','0.45');
+    svg.appendChild(pl); }
+  pl.setAttribute('points',pts.map(p=>p[0]+','+p[1]).join(' '));
+}
+function clearPath(idx){ const svg=document.getElementById('pathSvg');
+  const pl=svg.querySelector(`.path-r${idx}`); if(pl)pl.remove(); }
+
+/* ── Find nearest free robot ── */
+function findFree(tx,ty){
+  let best=null, bestD=Infinity;
+  robots.forEach((r,i)=>{
+    if(r.state!=='idle'&&r.state!=='returning')return;
+    let d=Math.abs(r.x-tx)+Math.abs(r.y-ty);
+    if(r.state==='returning') d+=80;
+    if(d<bestD){bestD=d;best=i;}
+  }); return best;
+}
+
+/* ── 1. BUSSING: Table calls for dish pickup ── */
+function callBussing(ti){
+  if(tableStates[ti].calling)return;
+  const ri=findFree(TABLES[ti].x,TABLES[ti].y);
+  if(ri===null){log(`<span class="bs">Bussing</span> <span class="tr">${TABLES[ti].name}</span> — no robot!`);return;}
+  const tbl=TABLES[ti], rob=robots[ri];
+  tableStates[ti].calling=true; tableStates[ti].served=false;
+  document.getElementById(tbl.el).classList.add('calling');
+  document.getElementById(tbl.el).classList.remove('served');
+  document.getElementById(tbl.btn).classList.add('ringing','disabled');
+  rob.state='moving'; rob.target=ti; rob.callType='bussing';
+  rob.path=calcPath(rob.x,rob.y,tbl.x,tbl.y,ri,ti); rob.pathIdx=0;
+  rob.el.classList.add('moving');
+  updateStatus(ri,'moving','🧹 → '+tbl.name);
+  clearPath(ri); drawPath(ri);
+  log(`<span class="bs">Bussing</span> <span class="rn">${rob.name}</span> 🧹 → <span class="tr">${tbl.name}</span>`);
+}
+
+/* ── 3. ONE-OFF: Robot goes to point and stays ── */
+function callOneoff(){
+  const ri=findFree(ONEOFF.x,ONEOFF.y);
+  if(ri===null){log(`<span class="oo">One-off</span> — no robot!`);return;}
+  const rob=robots[ri];
+  rob.state='moving'; rob.target=-1; rob.callType='oneoff';
+  rob.path=calcPath(rob.x,rob.y,ONEOFF.x,ONEOFF.y,ri); rob.pathIdx=0;
+  rob.el.classList.add('moving');
+  updateStatus(ri,'moving','📍 One-off');
+  clearPath(ri); drawPath(ri);
+  log(`<span class="oo">One-off</span> <span class="rn">${rob.name}</span> 📍 dispatched`);
+}
+
+/* ── Animation ── */
+function animate(){
+  robots.forEach((rob,idx)=>{
+    if((rob.state==='moving'||rob.state==='returning')&&rob.path.length&&rob.pathIdx<rob.path.length){
+      const wp=rob.path[rob.pathIdx];
+      const dx=wp.x-rob.x, dy=wp.y-rob.y, dist=Math.hypot(dx,dy);
+      if(dist<SPEED){
+        rob.x=wp.x; rob.y=wp.y; rob.pathIdx++;
+        if(rob.pathIdx>=rob.path.length){
+          if(rob.state==='moving'){
+            rob.el.classList.remove('moving'); clearPath(idx);
+
+            if(rob.callType==='bussing'){
+              // Bussing: wait for pickup button
+              rob.state='serving';
+              updateStatus(idx,'serving','Bussing');
+              log(`<span class="rn">${rob.name}</span> 🧹 at <span class="tr">${TABLES[rob.target].name}</span>, ready to pick up`);
+              showPickup(idx);
+
+            } else if(rob.callType==='oneoff'){
+              // One-off: idle at this point, no return
+              rob.state='idle'; rob.callType=null;
+              rob.homeX=ONEOFF.x; rob.homeY=ONEOFF.y; // new home is here
+              updateStatus(idx,'idle','Idle');
+              log(`<span class="rn">${rob.name}</span> 📍 <span class="oo">stationed at one-off point</span>`);
+            }
+          } else {
+            // Returned home
+            rob.state='idle'; rob.target=null; rob.callType=null;
+            rob.el.classList.remove('moving');
+            clearPath(idx); updateStatus(idx,'idle','Idle');
+            removeCarry(idx);
+          }
+        }
+      } else {
+        rob.x+=(dx/dist)*SPEED; rob.y+=(dy/dist)*SPEED;
+      }
+      drawPath(idx);
+    }
+  });
+  positionRobots();
+  requestAnimationFrame(animate);
+}
+
+/* ── Auto mode ── */
+function toggleAuto(){
+  autoMode=!autoMode;
+  const btn=document.getElementById('autoBtn');
+  if(autoMode){ btn.textContent='Stop Auto Mode'; btn.classList.add('active');
+    log('<span class="hl">Auto mode started</span>'); scheduleAuto();
+  } else { btn.textContent='Start Auto Mode'; btn.classList.remove('active');
+    clearTimeout(autoTimer); log('<span class="hl">Auto mode stopped</span>'); }
+}
+function scheduleAuto(){
+  if(!autoMode)return;
+  autoTimer=setTimeout(()=>{
+    if(!autoMode)return;
+    // Auto-receive for serving robots waiting
+    // Auto-pickup for waiting robots
+    const waitBus=robots.map((r,i)=>({r,i})).filter(o=>o.r.state==='serving'&&o.r.callType==='bussing');
+    if(waitBus.length){ doPickup(waitBus[Math.floor(Math.random()*waitBus.length)].i); }
+    else {
+      const r=Math.random();
+      if(r<0.75){ // bussing
+        const av=TABLES.filter((_,i)=>!tableStates[i].calling);
+        if(av.length) callBussing(av[Math.floor(Math.random()*av.length)].id);
+      } else { // oneoff
+        callOneoff();
+      }
+    }
+    scheduleAuto();
+  },1500+Math.random()*3000);
+}
+
+/* ── Reset ── */
+function resetAll(){
+  autoMode=false;
+  document.getElementById('autoBtn').textContent='Start Auto Mode';
+  document.getElementById('autoBtn').classList.remove('active');
+  clearTimeout(autoTimer);
+  robots.forEach((r,i)=>{
+    r.homeX=r.origX; r.homeY=r.origY;
+    r.x=r.origX; r.y=r.origY;
+    r.state='idle'; r.target=null; r.callType=null; r.path=[]; r.pathIdx=0;
+    r.el.classList.remove('moving');
+    updateStatus(i,'idle','Idle'); clearPath(i); removeCarry(i);
+    const rb=r.el.querySelector('.receive-btn'); if(rb)rb.remove();
+    const pb=r.el.querySelector('.pickup-btn'); if(pb)pb.remove();
+  });
+  TABLES.forEach((t,i)=>{
+    tableStates[i]={calling:false,served:false};
+    document.getElementById(t.el).classList.remove('calling','served');
+    document.getElementById(t.btn).classList.remove('ringing','disabled');
+    document.getElementById(t.dishes).classList.remove('visible');
+  });
+  positionRobots();
+  document.getElementById('logPanel').innerHTML='';
+  log('<span class="hl">Simulation reset</span>');
+}
+
+positionRobots(); animate();
+log('🧹 Bussing (table call) | 📍 One-off (kitchen call)');
+</script>
+</body>
+</html>

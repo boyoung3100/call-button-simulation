@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Call Button System Architecture</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #ffffff;
+    color: #222;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh; padding: 30px;
+  }
+  h1 { font-size: 1.5rem; color: #1a1a2e; margin-bottom: 4px; }
+  .subtitle { font-size: 0.78rem; color: #888; margin-bottom: 28px; }
+
+  .diagram {
+    position: relative;
+    width: 1430px; height: 580px;
+    background: #fff;
+    border-radius: 16px;
+    border: 1.5px solid #dde;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+  }
+
+  /* Zones */
+  .zone {
+    position: absolute; border-radius: 12px;
+    border: 1.5px dashed; top: 14px; bottom: 14px;
+  }
+  .zone-label {
+    position: absolute; bottom: 10px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.55rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 2px;
+    white-space: nowrap;
+  }
+  .z-field {
+    left: 12px; width: 348px;
+    border-color: #c8dcc8; background: rgba(220,240,220,0.25);
+  }
+  .z-field .zone-label { color: #6a8a6a; }
+  .z-cloud {
+    left: 372px; width: 838px;
+    border-color: #c8c8e8; background: rgba(220,220,245,0.15);
+  }
+  .z-cloud .zone-label { color: #6a6a9a; }
+  .z-robot {
+    right: 12px; width: 210px;
+    border-color: #e0cccc; background: rgba(245,225,225,0.2);
+  }
+  .z-robot .zone-label { color: #8a6060; }
+
+  /* Cards */
+  .card {
+    position: absolute; border-radius: 12px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 10px 8px;
+    background: #fff;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.07);
+  }
+  .card img {
+    border-radius: 6px; margin-bottom: 6px;
+    filter: drop-shadow(0 1px 3px rgba(0,0,0,0.15));
+  }
+  .card-title {
+    font-size: 0.75rem; font-weight: 700;
+    line-height: 1.2; margin-bottom: 2px; color: #222;
+  }
+  .card-sub { font-size: 0.52rem; color: #888; line-height: 1.3; }
+  .card-badge {
+    font-size: 0.44rem; font-weight: 700;
+    margin-top: 5px; padding: 2px 8px;
+    border-radius: 4px; letter-spacing: 0.5px;
+  }
+
+  .c-button {
+    left: 24px; top: 55px; width: 125px; height: 190px;
+    border: 1.5px solid #e0d0b0;
+  }
+  .c-button .card-badge { background: #fdf5e6; color: #aa7733; }
+
+  .c-receiver {
+    left: 220px; top: 55px; width: 130px; height: 190px;
+    border: 1.5px solid #b8d0e0;
+  }
+  .c-receiver .card-badge { background: #e8f2fa; color: #3a7a9a; }
+
+  .c-bridge {
+    left: 435px; top: 55px; width: 130px; height: 190px;
+    border: 1.5px solid #c0c0e0;
+  }
+  .c-bridge .card-badge { background: #eeeef8; color: #5555aa; }
+
+  .c-bsm {
+    left: 640px; top: 55px; width: 130px; height: 240px;
+    border: 1.5px solid #a0c8e0;
+  }
+  .c-bsm .card-badge { background: #e4f0fa; color: #2a7aaa; }
+
+  /* Task API expanded */
+  .c-task {
+    left: 845px; top: 40px; width: 250px; height: 340px;
+    border: 2px solid #a0d0b0;
+    background: #f8fcf9;
+    padding: 10px;
+    align-items: stretch; justify-content: flex-start;
+  }
+  .task-header { text-align: center; margin-bottom: 8px; }
+  .task-header .card-title { font-size: 0.82rem; color: #2a7a4a; }
+  .task-header .card-badge { background: #e0f4e8; color: #2a8855; display: inline-block; }
+  .task-inner { display: flex; flex-direction: column; gap: 6px; }
+  .task-sub-card {
+    border: 1.5px solid #cce0d4; border-radius: 8px;
+    padding: 8px; background: #fff;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .task-sub-icon { font-size: 1.2rem; flex-shrink: 0; }
+  .task-sub-text { text-align: left; }
+  .task-sub-title { font-size: 0.62rem; font-weight: 700; color: #2a6a4a; }
+  .task-sub-desc { font-size: 0.48rem; color: #778; line-height: 1.3; margin-top: 1px; }
+  .task-arrow-down { text-align: center; color: #aac8b8; font-size: 0.9rem; line-height: 1; }
+
+  .c-universe {
+    left: 590px; top: 390px; width: 220px; height: 120px;
+    border: 1.5px solid #c0b0e0;
+  }
+  .c-universe .card-title { color: #6a55aa; }
+  .c-universe .card-badge { background: #f0eef8; color: #6a55aa; }
+  .c-universe .card-sub { font-size: 0.5rem; color: #888; }
+
+  .c-robot {
+    left: 1240px; top: 55px; width: 160px; height: 190px;
+    border: 1.5px solid #e0baba;
+  }
+  .c-robot .card-badge { background: #faeaea; color: #aa5544; }
+
+  /* Signal ID */
+  .signal-id {
+    position: absolute;
+    font-family: 'Courier New', monospace;
+    font-size: 0.62rem; font-weight: 700;
+    padding: 4px 12px; border-radius: 5px;
+    background: #fdf8ee; border: 1.5px solid #e0d4b0;
+    color: #aa8833;
+    left: 36px; top: 262px;
+  }
+
+  /* SVG */
+  .arrows { position: absolute; inset: 0; pointer-events: none; }
+  .arr { fill: none; stroke-width: 2.5; stroke-linecap: round; }
+  .proto-label {
+    font-family: 'Courier New', monospace;
+    font-size: 12px; font-weight: 800;
+    text-anchor: middle;
+  }
+  .desc-label {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 10px; font-weight: 600;
+    text-anchor: middle;
+  }
+
+  /* Step circles */
+  .step-num {
+    position: absolute;
+    width: 24px; height: 24px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.65rem; font-weight: 900;
+    z-index: 5; border: 2px solid; background: #fff;
+  }
+
+  .legend {
+    display: flex; gap: 28px; margin-top: 20px;
+    font-size: 0.65rem; color: #777;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-line { width: 30px; height: 3px; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<h1>Call Button System Architecture</h1>
+<p class="subtitle">End-to-end signal flow: Button → Receiver → Bridge → Manager → Task API → Robot</p>
+
+<div class="diagram">
+  <div class="zone z-field"><div class="zone-label">On-Premise (Restaurant)</div></div>
+  <div class="zone z-cloud"><div class="zone-label">Google Cloud Platform</div></div>
+  <div class="zone z-robot"><div class="zone-label">Robot Fleet</div></div>
+
+  <svg class="arrows" width="1430" height="540">
+    <defs>
+      <marker id="a1" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#aa8833"/></marker>
+      <marker id="a2" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#3a7a9a"/></marker>
+      <marker id="a3" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#5555aa"/></marker>
+      <marker id="a4" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#2a7aaa"/></marker>
+      <marker id="a5" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#2a8855"/></marker>
+      <marker id="a6" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#6a55aa"/></marker>
+    </defs>
+
+    <!-- ① ST-800 → SRT-8200 (RF) -->
+    <line class="arr" x1="149" y1="150" x2="218" y2="150" stroke="#aa8833" stroke-dasharray="4,3" marker-end="url(#a1)"/>
+    <text class="proto-label" x="184" y="140" fill="#aa8833">RF</text>
+    <text class="desc-label" x="184" y="168" fill="#999">433MHz</text>
+
+    <!-- ② SRT-8200 → Bridge (TCP) -->
+    <line class="arr" x1="350" y1="150" x2="433" y2="150" stroke="#3a7a9a" marker-end="url(#a2)"/>
+    <text class="proto-label" x="392" y="140" fill="#3a7a9a">TCP</text>
+    <text class="desc-label" x="392" y="168" fill="#999">Socket connection</text>
+
+    <!-- ③ Bridge → BSM (gRPC) -->
+    <line class="arr" x1="565" y1="150" x2="638" y2="150" stroke="#5555aa" marker-end="url(#a3)"/>
+    <text class="proto-label" x="602" y="140" fill="#5555aa">gRPC</text>
+    <text class="desc-label" x="602" y="168" fill="#999">CallRobot()</text>
+
+    <!-- ④ BSM → Task API (gRPC) -->
+    <line class="arr" x1="770" y1="150" x2="843" y2="150" stroke="#2a7aaa" marker-end="url(#a4)"/>
+    <text class="proto-label" x="807" y="140" fill="#2a7aaa">gRPC</text>
+    <text class="desc-label" x="807" y="168" fill="#999">CreateTask()</text>
+
+    <!-- ⑤ Task API → Robot (via API Service) -->
+    <line class="arr" x1="1095" y1="150" x2="1238" y2="150" stroke="#2a8855" marker-end="url(#a5)"/>
+    <text class="proto-label" x="1167" y="140" fill="#2a8855">gRPC</text>
+    <text class="desc-label" x="1167" y="168" fill="#999">via API Service</text>
+
+    <!-- Universe → BSM (Update Setting) -->
+    <line class="arr" x1="705" y1="390" x2="705" y2="298" stroke="#6a55aa" stroke-dasharray="6,3" marker-end="url(#a6)"/>
+    <text class="proto-label" x="750" y="335" fill="#6a55aa">gRPC</text>
+    <text class="desc-label" x="750" y="352" fill="#999">Update Setting</text>
+  </svg>
+
+  <!-- Step numbers (on card top-left corners) -->
+  <div class="step-num" style="left:16px; top:47px; color:#aa8833; border-color:#d4c090;">1</div>
+  <div class="step-num" style="left:212px; top:47px; color:#3a7a9a; border-color:#a0c8d8;">2</div>
+  <div class="step-num" style="left:427px; top:47px; color:#5555aa; border-color:#b0b0d8;">3</div>
+  <div class="step-num" style="left:632px; top:47px; color:#2a7aaa; border-color:#90c0d8;">4</div>
+  <div class="step-num" style="left:837px; top:32px; color:#2a8855; border-color:#90d0a8;">5</div>
+  <div class="step-num" style="left:1232px; top:47px; color:#aa5544; border-color:#e0baba;">6</div>
+
+  <!-- Signal ID -->
+  <div class="signal-id">Signal ID: ABGOCXYS<br><span style="font-size:0.48rem; color:#bb9955; font-weight:400;">8-char alphanumeric</span></div>
+
+  <!-- Cards -->
+  <div class="card c-button">
+    <img src="st800.jpg" alt="ST-800" width="78">
+    <div class="card-title">Call Button</div>
+    <div class="card-sub">Syscall ST-800</div>
+    <div class="card-badge">RF Transmitter</div>
+  </div>
+
+  <div class="card c-receiver">
+    <img src="srt8200.png" alt="SRT-8200" width="92">
+    <div class="card-title">Receiver</div>
+    <div class="card-sub">Syscall SRT-8200</div>
+    <div class="card-badge">Ethernet</div>
+  </div>
+
+  <div class="card c-bridge">
+    <div style="font-size:2.4rem; margin-bottom:6px;">🌉</div>
+    <div class="card-title">Bell Signal<br>Bridge</div>
+    <div class="card-sub">TCP → gRPC<br>Protocol gateway</div>
+    <div class="card-badge">Compute Engine</div>
+  </div>
+
+  <div class="card c-bsm">
+    <div style="font-size:2.4rem; margin-bottom:2px;">🧠</div>
+    <div class="card-title">Bell Signal<br>Manager</div>
+    <div class="card-sub">Deduplication<br>Routing · Health</div>
+    <svg width="50" height="38" viewBox="0 0 50 38" style="margin-top:8px;">
+      <ellipse cx="25" cy="7" rx="20" ry="7" fill="#d0e4f4" stroke="#4a88bb" stroke-width="1.5"/>
+      <rect x="5" y="7" width="40" height="18" fill="#d0e4f4" stroke="none"/>
+      <line x1="5" y1="7" x2="5" y2="25" stroke="#4a88bb" stroke-width="1.5"/>
+      <line x1="45" y1="7" x2="45" y2="25" stroke="#4a88bb" stroke-width="1.5"/>
+      <ellipse cx="25" cy="25" rx="20" ry="7" fill="#d0e4f4" stroke="#4a88bb" stroke-width="1.5"/>
+    </svg>
+    <div style="font-size:0.5rem; font-weight:700; color:#2a6a9a; margin-top:2px;">MySQL</div>
+    <div class="card-badge">Cloud Run</div>
+  </div>
+
+  <!-- Task API expanded -->
+  <div class="card c-task">
+    <div class="task-header">
+      <div class="card-title">📋 Task API</div>
+      <div class="card-badge">Cloud Run</div>
+    </div>
+    <div class="task-inner">
+      <div class="task-sub-card">
+        <div class="task-sub-icon">🔍</div>
+        <div class="task-sub-text">
+          <div class="task-sub-title">Filtering Idle Robot</div>
+          <div class="task-sub-desc">Query available robots<br>Filter by group / location</div>
+        </div>
+      </div>
+      <div class="task-arrow-down">↓</div>
+      <div class="task-sub-card">
+        <div class="task-sub-icon">🎯</div>
+        <div class="task-sub-text">
+          <div class="task-sub-title">Nearest Selection</div>
+          <div class="task-sub-desc">Calculate distance to destination<br>Pick closest available robot</div>
+        </div>
+      </div>
+      <div class="task-arrow-down">↓</div>
+      <div class="task-sub-card">
+        <div class="task-sub-icon">🚀</div>
+        <div class="task-sub-text">
+          <div class="task-sub-title">API Service</div>
+          <div class="task-sub-desc">Create navigation mission<br>Dispatch to selected robot</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Universe -->
+  <div class="card c-universe">
+    <div style="font-size:2rem; margin-bottom:4px;">🌐</div>
+    <div class="card-title">Universe</div>
+    <div class="card-sub">
+      Bell settings<br>
+      Receiver config<br>
+      Robot group
+    </div>
+    <div class="card-badge">Admin Console</div>
+  </div>
+
+  <!-- Robot -->
+  <div class="card c-robot">
+    <img src="servi.png" alt="Servi" width="68" style="margin-top:2px;">
+    <div class="card-title">Servi Robot</div>
+    <div class="card-sub">Navigate to table<br>& return to base</div>
+    <div class="card-badge">Bear Robotics</div>
+  </div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-line" style="background:#aa8833;"></div> RF (433MHz)</div>
+  <div class="legend-item"><div class="legend-line" style="background:#3a7a9a;"></div> TCP Socket</div>
+  <div class="legend-item"><div class="legend-line" style="background:#5555aa;"></div> gRPC (Bridge→BSM)</div>
+  <div class="legend-item"><div class="legend-line" style="background:#2a7aaa;"></div> gRPC (BSM→Task)</div>
+  <div class="legend-item"><div class="legend-line" style="background:#2a8855;"></div> gRPC (API Service→Robot)</div>
+  <div class="legend-item"><div class="legend-line" style="background:#6a55aa; border-top:1px dashed #6a55aa;"></div> gRPC (Universe→BSM)</div>
+</div>
+
+</body>
+</html>
