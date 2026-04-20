@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chime Bell Robot Simulation</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #12142a;
+    color: #eee;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh; padding: 20px;
+  }
+  h1 { font-size: 1.5rem; margin-bottom: 6px; color: #e0e0ff; }
+  .subtitle { font-size: 0.82rem; color: #888; margin-bottom: 16px; }
+  .controls {
+    display: flex; gap: 12px; margin-bottom: 16px;
+    flex-wrap: wrap; justify-content: center;
+  }
+  .controls button {
+    padding: 8px 18px; border: none; border-radius: 8px;
+    font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-auto { background: #4a6cf7; color: #fff; }
+  .btn-auto:hover { background: #3a5ce5; }
+  .btn-auto.active { background: #f7584a; }
+  .btn-auto.active:hover { background: #e54a3a; }
+  .btn-reset { background: #444; color: #ccc; }
+  .btn-reset:hover { background: #555; }
+
+  .floor {
+    position: relative; width: 1020px; height: 740px;
+    background: #151830; border-radius: 16px;
+    border: 2px solid #2a2a4a; overflow: hidden;
+  }
+  .floor-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .floor-label {
+    position: absolute; top: 10px; left: 14px;
+    font-size: 0.6rem; color: #2a2a4a;
+    text-transform: uppercase; letter-spacing: 2px;
+  }
+  .corridor {
+    position: absolute; left: 0; right: 0;
+    top: 190px; height: 280px;
+    background: rgba(255,255,255,0.008);
+    border-top: 1px dashed rgba(255,255,255,0.05);
+    border-bottom: 1px dashed rgba(255,255,255,0.05);
+  }
+  .corridor-label {
+    position: absolute; top: 196px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.55rem; color: #2a3050;
+    text-transform: uppercase; letter-spacing: 3px;
+  }
+
+  /* Rooms */
+  .room {
+    position: absolute; width: 190px; height: 160px;
+    background: linear-gradient(180deg, #1a2040, #161c38);
+    border: 2px solid #304060;
+    border-radius: 10px 10px 0 0;
+    border-bottom: none;
+  }
+  .room::after {
+    content: ''; position: absolute;
+    bottom: 0; left: 0; right: 0; height: 2px;
+    background: #304060;
+  }
+  .room-door {
+    position: absolute; bottom: -1px;
+    left: 50%; transform: translateX(-50%);
+    width: 70px; height: 3px;
+    background: #151830; z-index: 2;
+  }
+  .room-name {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1rem; font-weight: 600;
+    color: #3a4a70; letter-spacing: 1px;
+  }
+  .room-icon {
+    position: absolute; top: 14px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.4rem; opacity: 0.4;
+  }
+
+  /* SRL-300 */
+  .srl300 {
+    position: absolute; z-index: 6;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .srl300-wrap {
+    position: relative; width: 50px; height: 65px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 16px;
+    transition: background 0.4s, box-shadow 0.4s;
+  }
+  .srl300-img {
+    width: 42px; height: auto;
+    filter: brightness(0.35) saturate(0);
+    transition: filter 0.4s;
+  }
+  .srl300-label {
+    font-size: 0.45rem; color: #445; margin-top: 1px;
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+
+  /* SRL-300 Yellow (departed) */
+  .srl300.yellow .srl300-wrap {
+    background: rgba(255, 220, 0, 0.35);
+    box-shadow: 0 0 24px rgba(255, 220, 0, 0.7), 0 0 50px rgba(255, 200, 0, 0.35);
+    animation: srl-pulse 0.5s ease-in-out infinite;
+  }
+  .srl300.yellow .srl300-img {
+    filter: brightness(1.8) saturate(2) sepia(1) hue-rotate(-5deg);
+  }
+  /* SRL-300 Green (arrived) */
+  .srl300.green .srl300-wrap {
+    background: rgba(0, 255, 80, 0.3);
+    box-shadow: 0 0 24px rgba(0, 255, 80, 0.7), 0 0 50px rgba(0, 255, 80, 0.35);
+  }
+  .srl300.green .srl300-img {
+    filter: brightness(1.8) saturate(2.5) hue-rotate(70deg);
+  }
+  @keyframes srl-pulse {
+    0%,100% { box-shadow: 0 0 24px rgba(255,220,0,0.7), 0 0 50px rgba(255,200,0,0.35); }
+    50% { box-shadow: 0 0 36px rgba(255,220,0,0.9), 0 0 70px rgba(255,200,0,0.5); }
+  }
+
+  /* Kitchen */
+  .kitchen {
+    position: absolute;
+    left: 110px; bottom: 20px;
+    width: 800px; height: 140px;
+    background: linear-gradient(180deg, #1c2240, #181e38);
+    border: 2px solid #354060;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .kitchen-label {
+    font-size: 0.9rem; font-weight: 700;
+    color: #3a4a6a; letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+  .kitchen-counter {
+    position: absolute; top: -2px; left: 60px; right: 60px;
+    height: 4px; background: #556080; border-radius: 2px;
+  }
+
+  /* Touchscreen panel under each robot */
+  .touch-screen {
+    margin-top: 2px; padding: 3px;
+    background: #0a0c1a; border: 1.5px solid #3a3a5a;
+    border-radius: 5px; pointer-events: auto;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 2px; width: 72px;
+    transition: opacity 0.3s;
+  }
+  .robot.moving .touch-screen,
+  .robot.away .touch-screen { opacity: 0; pointer-events: none; }
+  .dest-btn {
+    padding: 3px 2px; border: 1px solid #3a3a5a;
+    border-radius: 4px; background: #181c30;
+    color: #7780aa; font-size: 0.45rem; font-weight: 700;
+    cursor: pointer; transition: all 0.15s; text-align: center;
+    line-height: 1.2;
+  }
+  .dest-btn:hover { background: #2a3060; border-color: #6a7abb; color: #dde; }
+  .dest-btn:active { transform: scale(0.92); }
+  .dest-btn.disabled { opacity: 0.25; pointer-events: none; }
+  .dest-btn.r1:hover { border-color: #4a7aff; }
+  .dest-btn.r2:hover { border-color: #ff6b9d; }
+  .dest-btn.r3:hover { border-color: #4de8c2; }
+  .dest-btn.r4:hover { border-color: #f8a856; }
+
+  /* Robot sprite */
+  .robot {
+    position: absolute; z-index: 10; pointer-events: none;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .robot-status {
+    font-size: 0.48rem; white-space: nowrap;
+    padding: 1px 5px; border-radius: 3px; font-weight: bold;
+    margin-bottom: 2px;
+  }
+  .robot-status.idle { color: #6a6; background: rgba(50,120,50,0.25); }
+  .robot-status.moving { color: #fa0; background: rgba(200,150,0,0.25); }
+  .robot-status.serving { color: #5df; background: rgba(50,150,250,0.25); }
+  .robot-status.returning { color: #88f; background: rgba(80,80,200,0.25); }
+
+  .servi-ring {
+    width: 48px; height: 48px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    border: 2.5px solid var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    background: rgba(0,0,0,0.15);
+    position: relative;
+  }
+  .servi-img {
+    width: 42px; height: auto;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+  }
+  .robot.moving .servi-img { animation: bob 0.6s ease-in-out infinite; }
+  @keyframes bob {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+  }
+  .robot-label {
+    font-size: 0.48rem; white-space: nowrap;
+    font-weight: bold; margin-top: 2px; letter-spacing: 0.5px;
+  }
+
+  /* Food plate on robot */
+  .food-plate {
+    position: absolute; top: -6px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.4rem; z-index: 15;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    animation: food-float 2s ease-in-out infinite;
+  }
+  @keyframes food-float {
+    0%,100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-3px); }
+  }
+
+  /* Receive food button */
+  .receive-btn {
+    margin-top: 3px; padding: 4px 10px;
+    border: 1.5px solid #4af758; border-radius: 6px;
+    background: rgba(50,200,80,0.15); color: #4af758;
+    font-size: 0.55rem; font-weight: bold;
+    cursor: pointer; pointer-events: auto;
+    animation: pulse-receive 1s ease-in-out infinite;
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .receive-btn:hover { background: rgba(50,200,80,0.35); transform: scale(1.1); }
+  .receive-btn:active { transform: scale(0.95); }
+  @keyframes pulse-receive {
+    0%,100% { box-shadow: 0 0 4px rgba(74,247,88,0.3); }
+    50% { box-shadow: 0 0 12px rgba(74,247,88,0.6); }
+  }
+
+  .path-line { position: absolute; pointer-events: none; z-index: 5; }
+
+  .log-panel {
+    width: 1020px; margin-top: 14px;
+    background: #0e0e1a; border-radius: 10px;
+    padding: 10px 14px; max-height: 150px; overflow-y: auto;
+    font-family: 'Courier New', monospace; font-size: 0.72rem;
+    border: 1px solid #2a2a4a;
+  }
+  .log-entry { padding: 2px 0; border-bottom: 1px solid #1a1a2a; display: flex; gap: 10px; }
+  .log-time { color: #444; min-width: 70px; }
+  .log-msg { color: #999; }
+  .log-msg .hl { color: #f7a84a; }
+  .log-msg .rn { color: #5af; }
+  .log-msg .rm { color: #c8a0ff; }
+  .log-msg .ok { color: #4af758; }
+  .log-msg .bell { color: #ffcc00; }
+  .log-msg .warn { color: #ff6b6b; }
+
+  .legend {
+    display: flex; gap: 16px; margin-top: 10px;
+    font-size: 0.65rem; color: #666; flex-wrap: wrap; justify-content: center;
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+</style>
+</head>
+<body>
+
+<h1>Chime Bell Robot Dispatch Simulation</h1>
+<p class="subtitle">Select a destination room — SRL-300 chime bells light up on departure (yellow) and arrival (green)</p>
+
+<div class="controls">
+  <button class="btn-auto" id="autoBtn" onclick="toggleAuto()">Start Auto Mode</button>
+  <button class="btn-reset" onclick="resetAll()">Reset</button>
+</div>
+
+<div class="floor">
+  <div class="floor-grid"></div>
+  <div class="floor-label">Building Floor Plan</div>
+  <div class="corridor"></div>
+  <div class="corridor-label">Main Corridor</div>
+
+  <!-- 4 Rooms -->
+  <div class="room" id="room0" style="left:75px; top:20px;">
+    <div class="room-icon">🛏️</div><div class="room-name">Room 1</div><div class="room-door"></div>
+  </div>
+  <div class="room" id="room1" style="left:295px; top:20px;">
+    <div class="room-icon">🛏️</div><div class="room-name">Room 2</div><div class="room-door"></div>
+  </div>
+  <div class="room" id="room2" style="left:515px; top:20px;">
+    <div class="room-icon">🛏️</div><div class="room-name">Room 3</div><div class="room-door"></div>
+  </div>
+  <div class="room" id="room3" style="left:735px; top:20px;">
+    <div class="room-icon">🛏️</div><div class="room-name">Room 4</div><div class="room-door"></div>
+  </div>
+
+  <!-- SRL-300 Chime Bells -->
+  <div class="srl300" id="srl0" style="left:148px; top:177px;">
+    <div class="srl300-wrap"><img class="srl300-img" src="srl300.png" alt="SRL-300"></div>
+    <div class="srl300-label">SRL-300</div>
+  </div>
+  <div class="srl300" id="srl1" style="left:368px; top:177px;">
+    <div class="srl300-wrap"><img class="srl300-img" src="srl300.png" alt="SRL-300"></div>
+    <div class="srl300-label">SRL-300</div>
+  </div>
+  <div class="srl300" id="srl2" style="left:588px; top:177px;">
+    <div class="srl300-wrap"><img class="srl300-img" src="srl300.png" alt="SRL-300"></div>
+    <div class="srl300-label">SRL-300</div>
+  </div>
+  <div class="srl300" id="srl3" style="left:808px; top:177px;">
+    <div class="srl300-wrap"><img class="srl300-img" src="srl300.png" alt="SRL-300"></div>
+    <div class="srl300-label">SRL-300</div>
+  </div>
+
+  <!-- Kitchen -->
+  <div class="kitchen">
+    <div class="kitchen-counter"></div>
+    <div class="kitchen-label">🍳 Kitchen</div>
+  </div>
+
+  <!-- 4 Servi robots with touchscreen panels -->
+  <div class="robot" id="robot0">
+    <div class="robot-status idle">Idle</div>
+    <div class="servi-ring" style="--accent:#4a7aff;">
+      <img class="servi-img" src="servi.png" alt="Servi">
+    </div>
+    <div class="robot-label" style="color:#4a7aff;">Servi A</div>
+    <div class="touch-screen" id="panel0">
+      <button class="dest-btn r1" onclick="dispatch(0,0)">R1</button>
+      <button class="dest-btn r2" onclick="dispatch(0,1)">R2</button>
+      <button class="dest-btn r3" onclick="dispatch(0,2)">R3</button>
+      <button class="dest-btn r4" onclick="dispatch(0,3)">R4</button>
+    </div>
+  </div>
+  <div class="robot" id="robot1">
+    <div class="robot-status idle">Idle</div>
+    <div class="servi-ring" style="--accent:#ff6b9d;">
+      <img class="servi-img" src="servi.png" alt="Servi">
+    </div>
+    <div class="robot-label" style="color:#ff6b9d;">Servi B</div>
+    <div class="touch-screen" id="panel1">
+      <button class="dest-btn r1" onclick="dispatch(1,0)">R1</button>
+      <button class="dest-btn r2" onclick="dispatch(1,1)">R2</button>
+      <button class="dest-btn r3" onclick="dispatch(1,2)">R3</button>
+      <button class="dest-btn r4" onclick="dispatch(1,3)">R4</button>
+    </div>
+  </div>
+  <div class="robot" id="robot2">
+    <div class="robot-status idle">Idle</div>
+    <div class="servi-ring" style="--accent:#4de8c2;">
+      <img class="servi-img" src="servi.png" alt="Servi">
+    </div>
+    <div class="robot-label" style="color:#4de8c2;">Servi C</div>
+    <div class="touch-screen" id="panel2">
+      <button class="dest-btn r1" onclick="dispatch(2,0)">R1</button>
+      <button class="dest-btn r2" onclick="dispatch(2,1)">R2</button>
+      <button class="dest-btn r3" onclick="dispatch(2,2)">R3</button>
+      <button class="dest-btn r4" onclick="dispatch(2,3)">R4</button>
+    </div>
+  </div>
+  <div class="robot" id="robot3">
+    <div class="robot-status idle">Idle</div>
+    <div class="servi-ring" style="--accent:#f8a856;">
+      <img class="servi-img" src="servi.png" alt="Servi">
+    </div>
+    <div class="robot-label" style="color:#f8a856;">Servi D</div>
+    <div class="touch-screen" id="panel3">
+      <button class="dest-btn r1" onclick="dispatch(3,0)">R1</button>
+      <button class="dest-btn r2" onclick="dispatch(3,1)">R2</button>
+      <button class="dest-btn r3" onclick="dispatch(3,2)">R3</button>
+      <button class="dest-btn r4" onclick="dispatch(3,3)">R4</button>
+    </div>
+  </div>
+
+  <svg class="path-line" id="pathSvg" width="1020" height="740"
+       style="position:absolute;top:0;left:0;"></svg>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#555;"></div> SRL-300 Off</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ffdd00;"></div> Departed (Yellow)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#00ff50;"></div> Arrived (Green)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#4a7aff;border-radius:3px;"></div> Servi A</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ff6b9d;border-radius:3px;"></div> Servi B</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#4de8c2;border-radius:3px;"></div> Servi C</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#f8a856;border-radius:3px;"></div> Servi D</div>
+</div>
+
+<div class="log-panel" id="logPanel"></div>
+
+<script>
+/* ── Layout ── */
+const ROOM_CENTERS = [170, 390, 610, 830];
+const ROOM_DOOR_Y = 252;
+
+// Kitchen home positions — 4 robots lined up in front of kitchen
+const HOME_X = [230, 400, 580, 750];
+const HOME_Y = 490;
+
+const CORRIDOR_UPPER = 330;
+const CORRIDOR_LOWER = 360;
+function corridorY(idx) { return (idx === 0 || idx === 2) ? CORRIDOR_UPPER : CORRIDOR_LOWER; }
+
+const ROOMS = ROOM_CENTERS.map((cx, i) => ({
+  id: i, name: 'Room ' + (i + 1), cx, doorY: ROOM_DOOR_Y,
+  srlEl: document.getElementById('srl' + i),
+}));
+
+const ROBOT_COLORS = ['#4a7aff', '#ff6b9d', '#4de8c2', '#f8a856'];
+const ROBOT_NAMES = ['Servi A', 'Servi B', 'Servi C', 'Servi D'];
+const FOOD_EMOJIS = ['🍛', '🍱', '🍝', '🍲'];
+
+const robots = HOME_X.map((hx, i) => ({
+  el: document.getElementById('robot' + i),
+  homeX: hx, homeY: HOME_Y,
+  x: hx, y: HOME_Y,
+  state: 'idle', target: null,
+  path: [], pathIdx: 0,
+  color: ROBOT_COLORS[i], name: ROBOT_NAMES[i],
+}));
+
+const SPEED = 3;
+let autoMode = false, autoTimer = null;
+
+/* ── Utilities ── */
+function log(msg) {
+  const panel = document.getElementById('logPanel');
+  const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  entry.innerHTML = `<span class="log-time">${time}</span><span class="log-msg">${msg}</span>`;
+  panel.prepend(entry);
+  if (panel.children.length > 60) panel.removeChild(panel.lastChild);
+}
+
+function positionRobots() {
+  robots.forEach(r => {
+    r.el.style.left = (r.x - 24) + 'px';
+    r.el.style.top = (r.y - 34) + 'px';
+  });
+}
+
+function updateStatus(i, cls, txt) {
+  const s = robots[i].el.querySelector('.robot-status');
+  s.className = 'robot-status ' + cls;
+  s.textContent = txt;
+}
+
+function setPanelEnabled(ri, enabled) {
+  const panel = robots[ri].el.querySelector('.touch-screen');
+  if (panel) panel.querySelectorAll('.dest-btn')
+    .forEach(b => enabled ? b.classList.remove('disabled') : b.classList.add('disabled'));
+}
+
+/* ── Food plate on robot ── */
+function showFood(ri) {
+  removeFood(ri);
+  const plate = document.createElement('div');
+  plate.className = 'food-plate';
+  plate.textContent = FOOD_EMOJIS[ri % FOOD_EMOJIS.length];
+  robots[ri].el.querySelector('.servi-ring').appendChild(plate);
+}
+function removeFood(ri) {
+  const old = robots[ri].el.querySelector('.food-plate');
+  if (old) old.remove();
+}
+
+/* ── Receive food button ── */
+function showReceiveBtn(ri) {
+  const old = robots[ri].el.querySelector('.receive-btn');
+  if (old) old.remove();
+  const btn = document.createElement('button');
+  btn.className = 'receive-btn';
+  btn.textContent = '🍽️ Receive Food';
+  btn.onclick = () => receiveFood(ri);
+  // Insert right after robot-label, before touch-screen
+  const label = robots[ri].el.querySelector('.robot-label');
+  label.insertAdjacentElement('afterend', btn);
+}
+
+function receiveFood(ri) {
+  const rob = robots[ri];
+  if (rob.state !== 'serving') return;
+  const btn = rob.el.querySelector('.receive-btn');
+  if (btn) btn.remove();
+  removeFood(ri); // food taken off
+
+  const ct = rob.target;
+  log(`<span class="ok">Food received!</span> <span class="rn">${rob.name}</span> leaving <span class="rm">${ROOMS[ct].name}</span>`);
+
+  rob.state = 'returning';
+  rob.path = calcPath(rob.x, rob.y, rob.homeX, rob.homeY, ri);
+  rob.pathIdx = 0;
+  rob.el.classList.add('moving');
+  updateStatus(ri, 'returning', 'Returning');
+  drawPath(ri);
+}
+
+
+/* ── SRL-300 ── */
+function setSRL(ri, state) {
+  const el = ROOMS[ri].srlEl;
+  el.classList.remove('yellow', 'green');
+  if (state) el.classList.add(state);
+}
+
+/* ── Orthogonal path ── */
+function calcPath(sx, sy, tx, ty, ri) {
+  const cy = corridorY(ri);
+  const pts = [];
+  if (Math.abs(sy - cy) > 2) pts.push({ x: sx, y: cy });
+  const usedY = pts.length ? cy : sy;
+  if (Math.abs(sx - tx) > 2) pts.push({ x: tx, y: usedY });
+  pts.push({ x: tx, y: ty });
+  return pts;
+}
+
+/* ── Path drawing ── */
+function drawPath(idx) {
+  const svg = document.getElementById('pathSvg');
+  let pl = svg.querySelector(`.path-r${idx}`);
+  const r = robots[idx];
+  if (!r.path.length || r.pathIdx >= r.path.length) { if (pl) pl.remove(); return; }
+  const pts = [[r.x, r.y]];
+  for (let i = r.pathIdx; i < r.path.length; i++) pts.push([r.path[i].x, r.path[i].y]);
+  if (!pl) {
+    pl = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+    pl.setAttribute('class', `path-r${idx}`);
+    pl.setAttribute('fill', 'none');
+    pl.setAttribute('stroke', r.color);
+    pl.setAttribute('stroke-width', '2');
+    pl.setAttribute('stroke-dasharray', '6,4');
+    pl.setAttribute('stroke-opacity', '0.4');
+    svg.appendChild(pl);
+  }
+  pl.setAttribute('points', pts.map(p => p[0]+','+p[1]).join(' '));
+}
+function clearPath(idx) {
+  const svg = document.getElementById('pathSvg');
+  const pl = svg.querySelector(`.path-r${idx}`);
+  if (pl) pl.remove();
+}
+
+/* ── Safety check ── */
+function isRouteSafe(ri, roomIdx) {
+  const myLane = corridorY(ri);
+  const destX = ROOMS[roomIdx].cx;
+  const destY = ROOMS[roomIdx].doorY;
+
+  for (let i = 0; i < robots.length; i++) {
+    if (i === ri) continue;
+    const other = robots[i];
+
+    // 1) Another robot is serving/moving-to the same room destination
+    if (other.target === roomIdx && (other.state === 'moving' || other.state === 'serving')) {
+      return { safe: false, reason: `${other.name} is already at/heading to ${ROOMS[roomIdx].name}` };
+    }
+
+    // 2) Another robot is on the same corridor lane and moving
+    if ((other.state === 'moving' || other.state === 'returning') && corridorY(i) === myLane) {
+      // Check if the other robot is currently in the corridor (not at home/room)
+      const inCorridor = Math.abs(other.y - myLane) < 20;
+      if (inCorridor) {
+        return { safe: false, reason: `${other.name} is on the same corridor lane` };
+      }
+    }
+
+    // 3) Another robot is near the destination (within collision range)
+    if (Math.abs(other.x - destX) < 40 && Math.abs(other.y - destY) < 40 && other.state !== 'idle') {
+      return { safe: false, reason: `${other.name} is near ${ROOMS[roomIdx].name}` };
+    }
+  }
+  return { safe: true };
+}
+
+/* ── Dispatch ── */
+function dispatch(ri, roomIdx) {
+  const rob = robots[ri];
+  if (rob.state !== 'idle' && rob.state !== 'returning') return;
+
+  // Safety check
+  const check = isRouteSafe(ri, roomIdx);
+  if (!check.safe) {
+    log(`⚠️ <span class="rn">${rob.name}</span> → <span class="rm">${ROOMS[roomIdx].name}</span> blocked: ${check.reason}`);
+    return;
+  }
+
+  const room = ROOMS[roomIdx];
+  const wasReturning = rob.state === 'returning';
+
+  rob.state = 'moving';
+  rob.target = roomIdx;
+  rob.path = calcPath(rob.x, rob.y, room.cx, room.doorY, ri);
+  rob.pathIdx = 0;
+  rob.el.classList.add('moving', 'away');
+  updateStatus(ri, 'moving', '→ ' + room.name);
+  setPanelEnabled(ri, false);
+  clearPath(ri);
+  drawPath(ri);
+
+  // Food on robot
+  showFood(ri);
+
+  // SRL-300: YELLOW on departure, auto-off 1s
+  setSRL(roomIdx, 'yellow');
+  setTimeout(() => { if (ROOMS[roomIdx].srlEl.classList.contains('yellow')) setSRL(roomIdx, null); }, 1000);
+
+  const action = wasReturning ? 'redirected' : 'dispatched';
+  log(`<span class="rn">${rob.name}</span> ${action} → <span class="rm">${room.name}</span> | <span class="bell">SRL-300 Yellow</span>`);
+}
+
+/* ── Animation ── */
+function animate() {
+  robots.forEach((rob, idx) => {
+    if ((rob.state === 'moving' || rob.state === 'returning') && rob.path.length && rob.pathIdx < rob.path.length) {
+      const wp = rob.path[rob.pathIdx];
+      const dx = wp.x - rob.x, dy = wp.y - rob.y;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist < SPEED) {
+        rob.x = wp.x; rob.y = wp.y;
+        rob.pathIdx++;
+        if (rob.pathIdx >= rob.path.length) {
+          if (rob.state === 'moving') {
+            rob.state = 'serving';
+            rob.el.classList.remove('moving');
+            updateStatus(idx, 'serving', 'At ' + ROOMS[rob.target].name);
+            clearPath(idx);
+
+            // SRL-300: GREEN on arrival, auto-off 1s
+            const ct = rob.target;
+            setSRL(ct, 'green');
+            log(`<span class="rn">${rob.name}</span> arrived at <span class="rm">${ROOMS[ct].name}</span> | <span class="ok">SRL-300 Green</span>`);
+            setTimeout(() => { if (ROOMS[ct].srlEl.classList.contains('green')) setSRL(ct, null); }, 1000);
+
+            showReceiveBtn(idx);
+          } else {
+            rob.state = 'idle'; rob.target = null;
+            rob.el.classList.remove('moving', 'away');
+            clearPath(idx);
+            updateStatus(idx, 'idle', 'Idle');
+            setPanelEnabled(idx, true);
+            showFood(idx); // back at kitchen, food loaded
+          }
+        }
+      } else {
+        rob.x += (dx / dist) * SPEED;
+        rob.y += (dy / dist) * SPEED;
+      }
+      drawPath(idx);
+    }
+  });
+  positionRobots();
+  requestAnimationFrame(animate);
+}
+
+/* ── Auto mode ── */
+function toggleAuto() {
+  autoMode = !autoMode;
+  const btn = document.getElementById('autoBtn');
+  if (autoMode) {
+    btn.textContent = 'Stop Auto Mode'; btn.classList.add('active');
+    log('<span class="hl">Auto mode started</span>'); scheduleAuto();
+  } else {
+    btn.textContent = 'Start Auto Mode'; btn.classList.remove('active');
+    clearTimeout(autoTimer); log('<span class="hl">Auto mode stopped</span>');
+  }
+}
+function scheduleAuto() {
+  if (!autoMode) return;
+  autoTimer = setTimeout(() => {
+    if (!autoMode) return;
+    const serving = robots.map((r, i) => ({ r, i })).filter(o => o.r.state === 'serving');
+    if (serving.length) {
+      receiveFood(serving[Math.floor(Math.random() * serving.length)].i);
+    } else {
+      const idle = robots.map((r, i) => ({ r, i })).filter(o => o.r.state === 'idle');
+      if (idle.length) {
+        const pick = idle[Math.floor(Math.random() * idle.length)];
+        // Try random rooms until one is safe, up to 4 attempts
+        const rooms = [0,1,2,3].sort(() => Math.random() - 0.5);
+        for (const rm of rooms) {
+          if (isRouteSafe(pick.i, rm).safe) { dispatch(pick.i, rm); break; }
+        }
+      }
+    }
+    scheduleAuto();
+  }, 2000 + Math.random() * 3000);
+}
+
+/* ── Reset ── */
+function resetAll() {
+  autoMode = false;
+  document.getElementById('autoBtn').textContent = 'Start Auto Mode';
+  document.getElementById('autoBtn').classList.remove('active');
+  clearTimeout(autoTimer);
+  robots.forEach((r, i) => {
+    r.x = r.homeX; r.y = r.homeY;
+    r.state = 'idle'; r.target = null; r.path = []; r.pathIdx = 0;
+    r.el.classList.remove('moving', 'away');
+    updateStatus(i, 'idle', 'Idle');
+    setPanelEnabled(i, true);
+    clearPath(i);
+    const btn = r.el.querySelector('.receive-btn');
+    if (btn) btn.remove();
+    showFood(i); // food loaded at kitchen
+  });
+  ROOMS.forEach((_, i) => setSRL(i, null));
+  positionRobots();
+  document.getElementById('logPanel').innerHTML = '';
+  log('Simulation ready — select a destination for each Servi robot');
+}
+
+positionRobots();
+robots.forEach((_, i) => showFood(i)); // food loaded at kitchen
+animate();
+log('Simulation ready — select a destination for each Servi robot');
+</script>
+</body>
+</html>
