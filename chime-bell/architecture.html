@@ -195,6 +195,14 @@
     <text class="desc-label" x="584" y="173" fill="#999">Chime command</text>
     <text class="desc-label" x="584" y="185" fill="#999">to cached receiver ID</text>
 
+    <!-- Receiver → Bridge (health check, cache receiver ID) -->
+    <defs>
+      <marker id="a-cache" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#999"/></marker>
+    </defs>
+    <line class="arr" x1="658" y1="230" x2="512" y2="230" stroke="#999" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#a-cache)"/>
+    <text class="desc-label" x="585" y="248" fill="#999">Health check →</text>
+    <text class="desc-label" x="585" y="260" fill="#999">Cache Receiver ID</text>
+
     <!-- ③ Receiver → Chime Bell (RF) -->
     <line class="arr" x1="800" y1="155" x2="948" y2="155" stroke="#7a55aa" stroke-dasharray="4,3" marker-end="url(#a3)"/>
     <text class="proto-label" x="874" y="145" fill="#7a55aa">RF</text>
@@ -249,14 +257,6 @@
         <div class="bridge-sub-text">
           <div class="bridge-sub-title">Subscribe MQTT</div>
           <div class="bridge-sub-desc">Listen for mission status<br>(departed / arrived)</div>
-        </div>
-      </div>
-      <div style="text-align:center; color:#c0c0d8; font-size:0.75rem;">↓</div>
-      <div class="bridge-sub-card">
-        <div class="bridge-sub-icon">💾</div>
-        <div class="bridge-sub-text">
-          <div class="bridge-sub-title">Cached Receiver ID</div>
-          <div class="bridge-sub-desc">Stored from health check<br>during call button connection</div>
         </div>
       </div>
       <div style="text-align:center; color:#c0c0d8; font-size:0.75rem;">↓</div>
