@@ -226,17 +226,25 @@
   <!-- Servi Robot (with Chime Bell Microservice inside) -->
   <div class="card c-robot">
     <img src="servi.png" alt="Servi" width="55">
-    <div class="card-title">Servi Robot</div>
+    <div class="card-title">Chime Bell<br>Microservice</div>
     <div class="robot-inner">
-      <div class="robot-sub-card" style="border-color:#d4c8e8;">
-        <div class="robot-sub-icon">🔔</div>
+      <div class="robot-sub-card">
+        <div class="robot-sub-icon">📡</div>
         <div class="robot-sub-text">
-          <div class="robot-sub-title" style="color:#6a55aa;">Chime Bell Microservice</div>
-          <div class="robot-sub-desc">Monitors mission status<br>(departed / arrived)<br>→ Publish MQTT</div>
+          <div class="robot-sub-title">Mission Status</div>
+          <div class="robot-sub-desc">Monitors navigation state<br>(departed / arrived)</div>
+        </div>
+      </div>
+      <div class="robot-arrow-down">↓</div>
+      <div class="robot-sub-card">
+        <div class="robot-sub-icon">📤</div>
+        <div class="robot-sub-text">
+          <div class="robot-sub-title">Publish MQTT</div>
+          <div class="robot-sub-desc">Send status event<br>to Bell Signal Bridge</div>
         </div>
       </div>
     </div>
-    <div class="card-badge">Bear Robotics</div>
+    <div class="card-badge">On Robot (NUC)</div>
   </div>
 
   <!-- Bridge (expanded) -->
