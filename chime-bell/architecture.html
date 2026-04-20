@@ -18,7 +18,7 @@
 
   .diagram {
     position: relative;
-    width: 1380px; height: 420px;
+    width: 1130px; height: 420px;
     background: #fff;
     border-radius: 16px;
     border: 1.5px solid #dde;
@@ -43,12 +43,12 @@
   }
   .z-robot .zone-label { color: #8a6060; }
   .z-cloud {
-    left: 234px; width: 580px;
+    left: 234px; width: 340px;
     border-color: #c8c8e8; background: rgba(220,220,245,0.15);
   }
   .z-cloud .zone-label { color: #6a6a9a; }
   .z-field {
-    right: 12px; width: 550px;
+    right: 12px; width: 470px;
     border-color: #c8dcc8; background: rgba(220,240,220,0.25);
   }
   .z-field .zone-label { color: #6a8a6a; }
@@ -98,25 +98,32 @@
   .robot-arrow-down { text-align: center; color: #d4b8b8; font-size: 0.75rem; line-height: 1; }
 
   .c-bridge {
-    left: 310px; top: 55px; width: 155px; height: 200px;
+    left: 290px; top: 55px; width: 220px; height: 260px;
     border: 1.5px solid #c0c0e0;
   }
   .c-bridge .card-badge { background: #eeeef8; color: #5555aa; }
-
-  .c-bsm {
-    left: 555px; top: 55px; width: 155px; height: 200px;
-    border: 1.5px solid #a0c8e0;
+  .bridge-inner {
+    display: flex; flex-direction: column; gap: 4px;
+    margin-top: 6px; width: 100%;
   }
-  .c-bsm .card-badge { background: #e4f0fa; color: #2a7aaa; }
+  .bridge-sub-card {
+    border: 1.5px solid #d4d4e8; border-radius: 6px;
+    padding: 5px 8px; background: #fff;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .bridge-sub-icon { font-size: 0.9rem; flex-shrink: 0; }
+  .bridge-sub-text { text-align: left; }
+  .bridge-sub-title { font-size: 0.55rem; font-weight: 700; color: #5555aa; }
+  .bridge-sub-desc { font-size: 0.42rem; color: #999; line-height: 1.2; margin-top: 1px; }
 
   .c-receiver {
-    left: 860px; top: 55px; width: 140px; height: 200px;
+    left: 660px; top: 55px; width: 140px; height: 200px;
     border: 1.5px solid #b8d0e0;
   }
   .c-receiver .card-badge { background: #e8f2fa; color: #3a7a9a; }
 
   .c-chime {
-    left: 1130px; top: 55px; width: 130px; height: 200px;
+    left: 950px; top: 55px; width: 130px; height: 200px;
     border: 1.5px solid #c8b0e0;
   }
   .c-chime .card-badge { background: #f0e8fa; color: #7a55aa; }
@@ -167,57 +174,50 @@
 <p class="subtitle">Signal flow (reverse of Call Button): Robot → Bell Signal Bridge → Ethernet Receiver → Chime Bell</p>
 
 <div class="diagram">
-  <div class="zone z-robot"><div class="zone-label">Robot Fleet</div></div>
-  <div class="zone z-cloud"><div class="zone-label">Google Cloud Platform</div></div>
+  <div class="zone z-cloud" style="left:12px; width:562px;"><div class="zone-label">Google Cloud Platform</div></div>
   <div class="zone z-field"><div class="zone-label">On-Premise (Restaurant)</div></div>
 
-  <svg class="arrows" width="1380" height="420">
+  <svg class="arrows" width="1130" height="420">
     <defs>
       <marker id="a1" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#aa5544"/></marker>
-      <marker id="a2" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#5555aa"/></marker>
-      <marker id="a3" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#3a7a9a"/></marker>
-      <marker id="a4" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#7a55aa"/></marker>
+      <marker id="a2" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#3a7a9a"/></marker>
+      <marker id="a3" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#7a55aa"/></marker>
     </defs>
 
     <!-- ① Robot → Bridge (MQTT) -->
-    <line class="arr" x1="204" y1="155" x2="308" y2="155" stroke="#aa5544" marker-end="url(#a1)"/>
-    <text class="proto-label" x="256" y="145" fill="#aa5544">MQTT</text>
-    <text class="desc-label" x="256" y="173" fill="#999">Mission status topic</text>
+    <line class="arr" x1="204" y1="155" x2="288" y2="155" stroke="#aa5544" marker-end="url(#a1)"/>
+    <text class="proto-label" x="246" y="145" fill="#aa5544">MQTT</text>
+    <text class="desc-label" x="246" y="173" fill="#999">Mission status topic</text>
 
-    <!-- ② Bridge → BSM (gRPC) - config lookup -->
-    <line class="arr" x1="388" y1="200" x2="388" y2="200" stroke="none"/>
-    <line class="arr" x1="465" y1="155" x2="553" y2="155" stroke="#5555aa" marker-end="url(#a2)" stroke-dasharray="6,3"/>
-    <text class="proto-label" x="509" y="145" fill="#5555aa">gRPC</text>
-    <text class="desc-label" x="509" y="173" fill="#999">Chime config lookup</text>
+    <!-- ② Bridge → Receiver (TCP) -->
+    <line class="arr" x1="510" y1="155" x2="658" y2="155" stroke="#3a7a9a" marker-end="url(#a2)"/>
+    <text class="proto-label" x="584" y="145" fill="#3a7a9a">TCP</text>
+    <text class="desc-label" x="584" y="173" fill="#999">Chime command</text>
+    <text class="desc-label" x="584" y="185" fill="#999">to cached receiver ID</text>
 
-    <!-- ③ Bridge → Receiver (TCP) -->
-    <line class="arr" x1="465" y1="185" x2="858" y2="185" stroke="#3a7a9a" marker-end="url(#a3)"/>
-    <text class="proto-label" x="662" y="175" fill="#3a7a9a">TCP</text>
-    <text class="desc-label" x="662" y="203" fill="#999">Send chime command</text>
-
-    <!-- ④ Receiver → Chime Bell (RF) -->
-    <line class="arr" x1="1000" y1="155" x2="1128" y2="155" stroke="#7a55aa" stroke-dasharray="4,3" marker-end="url(#a4)"/>
-    <text class="proto-label" x="1064" y="145" fill="#7a55aa">RF</text>
-    <text class="desc-label" x="1064" y="173" fill="#999">433MHz signal</text>
+    <!-- ③ Receiver → Chime Bell (RF) -->
+    <line class="arr" x1="800" y1="155" x2="948" y2="155" stroke="#7a55aa" stroke-dasharray="4,3" marker-end="url(#a3)"/>
+    <text class="proto-label" x="874" y="145" fill="#7a55aa">RF</text>
+    <text class="desc-label" x="874" y="173" fill="#999">433MHz signal</text>
   </svg>
 
   <!-- Step numbers -->
   <div class="step-num" style="left:16px; top:47px; color:#aa5544; border-color:#e0baba;">1</div>
-  <div class="step-num" style="left:302px; top:47px; color:#5555aa; border-color:#b0b0d8;">2</div>
-  <div class="step-num" style="left:852px; top:47px; color:#3a7a9a; border-color:#a0c8d8;">3</div>
-  <div class="step-num" style="left:1122px; top:47px; color:#7a55aa; border-color:#c8b0e0;">4</div>
+  <div class="step-num" style="left:282px; top:47px; color:#5555aa; border-color:#b0b0d8;">2</div>
+  <div class="step-num" style="left:652px; top:47px; color:#3a7a9a; border-color:#a0c8d8;">3</div>
+  <div class="step-num" style="left:942px; top:47px; color:#7a55aa; border-color:#c8b0e0;">4</div>
 
   <!-- Note -->
-  <div class="note-box" style="left:860px; top:280px;">
+  <div class="note-box" style="left:880px; top:280px;">
     Chime bell rings only if the received RF signal ID matches a pre-registered ID on the device.
   </div>
 
   <!-- Cards -->
 
-  <!-- Robot (expanded with mission status) -->
+  <!-- Chime Bell Microservice -->
   <div class="card c-robot">
-    <img src="servi.png" alt="Servi" width="60">
-    <div class="card-title">Servi Robot</div>
+    <div style="font-size:2rem; margin-bottom:4px;">🔔</div>
+    <div class="card-title">Chime Bell<br>Microservice</div>
     <div class="robot-inner">
       <div class="robot-sub-card">
         <div class="robot-sub-icon">📡</div>
@@ -235,40 +235,39 @@
         </div>
       </div>
     </div>
-    <div class="card-badge">Bear Robotics</div>
-  </div>
-
-  <!-- Bridge -->
-  <div class="card c-bridge">
-    <div style="font-size:2.2rem; margin-bottom:6px;">🌉</div>
-    <div class="card-title">Bell Signal<br>Bridge</div>
-    <div class="card-sub">
-      Subscribe MQTT topic<br>
-      Lookup chime config<br>
-      Send TCP command<br>
-      to Ethernet receiver
-    </div>
-    <div class="card-badge">Compute Engine</div>
-  </div>
-
-  <!-- BSM (config only) -->
-  <div class="card c-bsm">
-    <div style="font-size:2.2rem; margin-bottom:2px;">🧠</div>
-    <div class="card-title">Bell Signal<br>Manager</div>
-    <div class="card-sub">
-      Chime bell config<br>
-      Which bell for which<br>
-      destination
-    </div>
-    <svg width="44" height="32" viewBox="0 0 44 32" style="margin-top:6px;">
-      <ellipse cx="22" cy="6" rx="18" ry="6" fill="#d0e4f4" stroke="#4a88bb" stroke-width="1.5"/>
-      <rect x="4" y="6" width="36" height="14" fill="#d0e4f4" stroke="none"/>
-      <line x1="4" y1="6" x2="4" y2="20" stroke="#4a88bb" stroke-width="1.5"/>
-      <line x1="40" y1="6" x2="40" y2="20" stroke="#4a88bb" stroke-width="1.5"/>
-      <ellipse cx="22" cy="20" rx="18" ry="6" fill="#d0e4f4" stroke="#4a88bb" stroke-width="1.5"/>
-    </svg>
-    <div style="font-size:0.48rem; font-weight:700; color:#2a6a9a; margin-top:1px;">MySQL</div>
     <div class="card-badge">Cloud Run</div>
+  </div>
+
+  <!-- Bridge (expanded) -->
+  <div class="card c-bridge">
+    <div style="font-size:1.8rem; margin-bottom:4px;">🌉</div>
+    <div class="card-title">Bell Signal Bridge</div>
+    <div class="card-badge" style="margin-bottom:4px;">Compute Engine</div>
+    <div class="bridge-inner">
+      <div class="bridge-sub-card">
+        <div class="bridge-sub-icon">📥</div>
+        <div class="bridge-sub-text">
+          <div class="bridge-sub-title">Subscribe MQTT</div>
+          <div class="bridge-sub-desc">Listen for mission status<br>(departed / arrived)</div>
+        </div>
+      </div>
+      <div style="text-align:center; color:#c0c0d8; font-size:0.75rem;">↓</div>
+      <div class="bridge-sub-card">
+        <div class="bridge-sub-icon">💾</div>
+        <div class="bridge-sub-text">
+          <div class="bridge-sub-title">Cached Receiver ID</div>
+          <div class="bridge-sub-desc">Stored from health check<br>during call button connection</div>
+        </div>
+      </div>
+      <div style="text-align:center; color:#c0c0d8; font-size:0.75rem;">↓</div>
+      <div class="bridge-sub-card">
+        <div class="bridge-sub-icon">📤</div>
+        <div class="bridge-sub-text">
+          <div class="bridge-sub-title">Send TCP Command</div>
+          <div class="bridge-sub-desc">Route chime signal<br>to target receiver ID</div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Ethernet Receiver -->
@@ -291,7 +290,6 @@
 
 <div class="legend">
   <div class="legend-item"><div class="legend-line" style="background:#aa5544;"></div> MQTT (Robot→Bridge)</div>
-  <div class="legend-item"><div class="legend-line" style="background:#5555aa; border-top:1px dashed #5555aa;"></div> gRPC (Bridge→BSM, config)</div>
   <div class="legend-item"><div class="legend-line" style="background:#3a7a9a;"></div> TCP (Bridge→Receiver)</div>
   <div class="legend-item"><div class="legend-line" style="background:#7a55aa;"></div> RF 433MHz (Receiver→Chime)</div>
 </div>
