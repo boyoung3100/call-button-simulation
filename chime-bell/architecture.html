@@ -188,7 +188,7 @@
     <!-- ① Robot → Bridge (MQTT) -->
     <line class="arr" x1="204" y1="155" x2="288" y2="155" stroke="#aa5544" marker-end="url(#a1)"/>
     <text class="proto-label" x="246" y="145" fill="#aa5544">MQTT</text>
-    <text class="desc-label" x="246" y="173" fill="#999">Mission status topic</text>
+    <text class="desc-label" x="246" y="173" fill="#999">Signal topic</text>
 
     <!-- ② Bridge → Receiver (TCP) -->
     <line class="arr" x1="510" y1="155" x2="658" y2="155" stroke="#3a7a9a" marker-end="url(#a2)"/>
@@ -257,7 +257,7 @@
         <div class="bridge-sub-icon">📥</div>
         <div class="bridge-sub-text">
           <div class="bridge-sub-title">Subscribe MQTT</div>
-          <div class="bridge-sub-desc">Listen for mission status<br>(departed / arrived)</div>
+          <div class="bridge-sub-desc">Listen for signal topic<br>(receiver_id, signal_id)</div>
         </div>
       </div>
       <div style="text-align:center; color:#c0c0d8; font-size:0.75rem;">↓</div>
