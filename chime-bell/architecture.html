@@ -17,7 +17,7 @@
 
   .diagram {
     position: relative;
-    width: 1340px; height: 620px;
+    width: 1200px; height: 620px;
     background: #fff; border-radius: 16px;
     border: 1.5px solid #dde;
     box-shadow: 0 2px 20px rgba(0,0,0,0.06);
@@ -44,7 +44,7 @@
   }
   .z-cloud .zone-label { bottom: 10px; color: #6a6a9a; }
   .z-field {
-    left: 674px; top: 14px; width: 654px; bottom: 14px;
+    left: 674px; top: 14px; width: 514px; bottom: 14px;
     border-color: #c8dcc8; background: rgba(220,240,220,0.12);
   }
   .z-field .zone-label { bottom: 10px; color: #6a8a6a; }
@@ -71,16 +71,16 @@
 
   /* Main flow cards — top row, uniform height */
   .c-micro  { left: 20px;   top: 34px; width: 226px; height: 380px; border: 1.5px solid #e0baba; }
-  .c-bridge { left: 280px;  top: 34px; width: 220px; height: 300px; border: 1.5px solid #c0c0e0; }
+  .c-bridge { left: 310px;  top: 34px; width: 220px; height: 300px; border: 1.5px solid #c0c0e0; }
   .c-recv   { left: 720px;  top: 34px; width: 170px; height: 300px; border: 1.5px solid #b8d0e0; }
-  .c-chime  { left: 1130px; top: 34px; width: 170px; height: 300px; border: 1.5px solid #c8b0e0; }
+  .c-chime  { left: 1000px; top: 34px; width: 170px; height: 300px; border: 1.5px solid #c8b0e0; }
   .c-micro  .card-badge { background: #faeaea; color: #aa5544; }
   .c-bridge .card-badge { background: #eeeef8; color: #5555aa; }
   .c-recv   .card-badge { background: #e8f2fa; color: #3a7a9a; }
   .c-chime  .card-badge { background: #f0e8fa; color: #7a55aa; }
 
   /* Config card — bottom row */
-  .c-bsm { left: 280px; top: 370px; width: 368px; height: 120px; border: 1.5px solid #a0c8e0; }
+  .c-bsm { left: 310px; top: 370px; width: 338px; height: 120px; border: 1.5px solid #a0c8e0; }
   .c-bsm .card-title { color: #2a7aaa; }
   .c-bsm .card-badge { background: #e4f0fa; color: #2a7aaa; }
   .bsm-content {
@@ -90,7 +90,7 @@
   .bsm-db { display: flex; flex-direction: column; align-items: center; }
 
   /* Universe card */
-  .c-uni { left: 280px; top: 510px; width: 368px; height: 55px; border: 1.5px solid #c0b0e0; }
+  .c-uni { left: 310px; top: 510px; width: 338px; height: 55px; border: 1.5px solid #c0b0e0; }
   .c-uni .card-title { color: #6a55aa; font-size: 0.7rem; }
   .c-uni .card-badge { background: #f0eef8; color: #6a55aa; }
   .uni-content { display: flex; align-items: center; gap: 12px; }
@@ -151,7 +151,7 @@
   <div class="zone z-field"><div class="zone-label">On-Premise (Restaurant)</div></div>
 
   <!-- SVG Arrows -->
-  <svg class="arrows" width="1340" height="620">
+  <svg class="arrows" width="1200" height="620">
     <defs>
       <marker id="a1" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#aa5544"/></marker>
       <marker id="a2" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#3a7a9a"/></marker>
@@ -162,40 +162,40 @@
     </defs>
 
     <!-- ① Microservice → Bridge (MQTT) -->
-    <line class="arr" x1="246" y1="160" x2="278" y2="160" stroke="#aa5544" marker-end="url(#a1)"/>
-    <text class="proto-label" x="262" y="148" fill="#aa5544">MQTT</text>
-    <text class="desc-label" x="262" y="178" fill="#999">Signal topic</text>
+    <line class="arr" x1="246" y1="160" x2="308" y2="160" stroke="#aa5544" marker-end="url(#a1)"/>
+    <text class="proto-label" x="277" y="148" fill="#aa5544">MQTT</text>
+    <text class="desc-label" x="277" y="178" fill="#999">Signal topic</text>
 
     <!-- ② Bridge → Receiver (TCP) -->
-    <line class="arr" x1="500" y1="160" x2="718" y2="160" stroke="#3a7a9a" marker-end="url(#a2)"/>
-    <text class="proto-label" x="609" y="148" fill="#3a7a9a">TCP</text>
-    <text class="desc-label" x="609" y="178" fill="#999">Chime command</text>
+    <line class="arr" x1="530" y1="160" x2="718" y2="160" stroke="#3a7a9a" marker-end="url(#a2)"/>
+    <text class="proto-label" x="624" y="148" fill="#3a7a9a">TCP</text>
+    <text class="desc-label" x="624" y="178" fill="#999">Chime command</text>
 
     <!-- Health check: Receiver → Bridge (dashed) -->
-    <line class="arr" x1="718" y1="230" x2="502" y2="230" stroke="#aaa" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#a-cache)"/>
-    <text class="desc-label" x="610" y="250" fill="#aaa">Health check → Cache Receiver ID</text>
+    <line class="arr" x1="718" y1="230" x2="532" y2="230" stroke="#aaa" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#a-cache)"/>
+    <text class="desc-label" x="625" y="250" fill="#aaa">Health check → Cache Receiver ID</text>
 
     <!-- ③ Receiver → Chime Bell (RF) -->
-    <line class="arr" x1="890" y1="160" x2="1128" y2="160" stroke="#7a55aa" stroke-dasharray="4,3" marker-end="url(#a3)"/>
-    <text class="proto-label" x="1009" y="148" fill="#7a55aa">RF</text>
-    <text class="desc-label" x="1009" y="178" fill="#999">433MHz signal</text>
+    <line class="arr" x1="890" y1="160" x2="998" y2="160" stroke="#7a55aa" stroke-dasharray="4,3" marker-end="url(#a3)"/>
+    <text class="proto-label" x="944" y="148" fill="#7a55aa">RF</text>
+    <text class="desc-label" x="944" y="178" fill="#999">433MHz</text>
 
     <!-- BSM → Microservice (one-time fetch) -->
-    <line class="arr" x1="280" y1="420" x2="210" y2="416" stroke="#2a7aaa" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#a-bsm)"/>
-    <text class="desc-label" x="245" y="440" fill="#2a7aaa">gRPC FetchSettings()</text>
-    <text class="desc-label" x="245" y="452" fill="#999">One-time on startup</text>
+    <line class="arr" x1="310" y1="410" x2="220" y2="410" stroke="#2a7aaa" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#a-bsm)"/>
+    <text class="desc-label" x="265" y="430" fill="#2a7aaa">gRPC FetchSettings()</text>
+    <text class="desc-label" x="265" y="442" fill="#999">One-time on startup</text>
 
     <!-- Universe → BSM (Update Setting) -->
     <line class="arr" x1="464" y1="510" x2="464" y2="492" stroke="#6a55aa" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#a-uni)"/>
-    <text class="proto-label" x="520" y="504" fill="#6a55aa">gRPC</text>
-    <text class="desc-label" x="520" y="517" fill="#999">Update Setting</text>
+    <text class="proto-label" x="530" y="504" fill="#6a55aa">gRPC</text>
+    <text class="desc-label" x="530" y="517" fill="#999">Update Setting</text>
   </svg>
 
   <!-- Step numbers -->
   <div class="step-num" style="left:12px; top:26px; color:#aa5544; border-color:#e0baba;">1</div>
-  <div class="step-num" style="left:272px; top:26px; color:#5555aa; border-color:#b0b0d8;">2</div>
+  <div class="step-num" style="left:302px; top:26px; color:#5555aa; border-color:#b0b0d8;">2</div>
   <div class="step-num" style="left:712px; top:26px; color:#3a7a9a; border-color:#a0c8d8;">3</div>
-  <div class="step-num" style="left:1122px; top:26px; color:#7a55aa; border-color:#c8b0e0;">4</div>
+  <div class="step-num" style="left:992px; top:26px; color:#7a55aa; border-color:#c8b0e0;">4</div>
 
   <!-- ① Chime Bell Microservice -->
   <div class="card c-micro">
@@ -305,7 +305,7 @@
   </div>
 
   <!-- Note -->
-  <div class="note-box" style="right: 24px; top: 380px;">
+  <div class="note-box" style="left: 960px; top: 380px;">
     Chime bell rings only when the received<br>
     RF signal ID matches a pre-registered ID.
   </div>
