@@ -174,7 +174,8 @@
 <p class="subtitle">Signal flow (reverse of Call Button): Robot → Bell Signal Bridge → Ethernet Receiver → Chime Bell</p>
 
 <div class="diagram">
-  <div class="zone z-cloud" style="left:12px; width:562px;"><div class="zone-label">Google Cloud Platform</div></div>
+  <div class="zone z-robot"><div class="zone-label">Robot</div></div>
+  <div class="zone z-cloud"><div class="zone-label">Google Cloud Platform</div></div>
   <div class="zone z-field"><div class="zone-label">On-Premise (Restaurant)</div></div>
 
   <svg class="arrows" width="1130" height="420">
@@ -222,28 +223,20 @@
 
   <!-- Cards -->
 
-  <!-- Chime Bell Microservice -->
+  <!-- Servi Robot (with Chime Bell Microservice inside) -->
   <div class="card c-robot">
-    <div style="font-size:2rem; margin-bottom:4px;">🔔</div>
-    <div class="card-title">Chime Bell<br>Microservice</div>
+    <img src="servi.png" alt="Servi" width="55">
+    <div class="card-title">Servi Robot</div>
     <div class="robot-inner">
-      <div class="robot-sub-card">
-        <div class="robot-sub-icon">📡</div>
+      <div class="robot-sub-card" style="border-color:#d4c8e8;">
+        <div class="robot-sub-icon">🔔</div>
         <div class="robot-sub-text">
-          <div class="robot-sub-title">Mission Status</div>
-          <div class="robot-sub-desc">Monitors navigation state<br>(departed / arrived)</div>
-        </div>
-      </div>
-      <div class="robot-arrow-down">↓</div>
-      <div class="robot-sub-card">
-        <div class="robot-sub-icon">📤</div>
-        <div class="robot-sub-text">
-          <div class="robot-sub-title">Publish MQTT</div>
-          <div class="robot-sub-desc">Send status event<br>to Bell Signal Bridge</div>
+          <div class="robot-sub-title" style="color:#6a55aa;">Chime Bell Microservice</div>
+          <div class="robot-sub-desc">Monitors mission status<br>(departed / arrived)<br>→ Publish MQTT</div>
         </div>
       </div>
     </div>
-    <div class="card-badge">Cloud Run</div>
+    <div class="card-badge">Bear Robotics</div>
   </div>
 
   <!-- Bridge (expanded) -->
