@@ -18,7 +18,7 @@
 
   .diagram {
     position: relative;
-    width: 1200px; height: 440px;
+    width: 1300px; height: 440px;
     background: #fff;
     border-radius: 16px;
     border: 1.5px solid #dde;
@@ -43,12 +43,12 @@
   }
   .z-robot .zone-label { color: #8a6060; }
   .z-cloud {
-    left: 244px; width: 376px;
+    left: 244px; width: 430px;
     border-color: #c8c8e8; background: rgba(220,220,245,0.12);
   }
   .z-cloud .zone-label { color: #6a6a9a; }
   .z-field {
-    left: 632px; width: 556px;
+    left: 688px; width: 600px;
     border-color: #c8dcc8; background: rgba(220,240,220,0.15);
   }
   .z-field .zone-label { color: #6a8a6a; }
@@ -85,19 +85,19 @@
   .c-robot .card-badge { background: #faeaea; color: #aa5544; }
 
   .c-bridge {
-    left: 268px; top: 50px; width: 230px; height: 300px;
+    left: 320px; top: 50px; width: 230px; height: 300px;
     border: 1.5px solid #c0c0e0;
   }
   .c-bridge .card-badge { background: #eeeef8; color: #5555aa; }
 
   .c-receiver {
-    left: 660px; top: 50px; width: 170px; height: 300px;
+    left: 720px; top: 50px; width: 170px; height: 300px;
     border: 1.5px solid #b8d0e0;
   }
   .c-receiver .card-badge { background: #e8f2fa; color: #3a7a9a; }
 
   .c-chime {
-    left: 1010px; top: 50px; width: 170px; height: 300px;
+    left: 1100px; top: 50px; width: 170px; height: 300px;
     border: 1.5px solid #c8b0e0;
   }
   .c-chime .card-badge { background: #f0e8fa; color: #7a55aa; }
@@ -165,12 +165,12 @@
 
 <div class="diagram">
   <!-- Zones -->
-  <div class="zone z-robot"><div class="zone-label">Robot (NUC)</div></div>
+  <div class="zone z-robot"><div class="zone-label">Robot</div></div>
   <div class="zone z-cloud"><div class="zone-label">Google Cloud Platform</div></div>
   <div class="zone z-field"><div class="zone-label">On-Premise (Restaurant)</div></div>
 
   <!-- SVG Arrows -->
-  <svg class="arrows" width="1200" height="440">
+  <svg class="arrows" width="1300" height="440">
     <defs>
       <marker id="a1" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#aa5544"/></marker>
       <marker id="a2" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#3a7a9a"/></marker>
@@ -179,33 +179,33 @@
     </defs>
 
     <!-- ① Microservice → Bridge (MQTT) -->
-    <line class="arr" x1="218" y1="160" x2="266" y2="160" stroke="#aa5544" marker-end="url(#a1)"/>
-    <text class="proto-label" x="242" y="150" fill="#aa5544">MQTT</text>
-    <text class="desc-label" x="242" y="178" fill="#999">Signal topic</text>
+    <line class="arr" x1="218" y1="160" x2="318" y2="160" stroke="#aa5544" marker-end="url(#a1)"/>
+    <text class="proto-label" x="268" y="148" fill="#aa5544">MQTT</text>
+    <text class="desc-label" x="268" y="178" fill="#999">Signal topic</text>
 
     <!-- ② Bridge → Receiver (TCP) -->
-    <line class="arr" x1="498" y1="160" x2="658" y2="160" stroke="#3a7a9a" marker-end="url(#a2)"/>
-    <text class="proto-label" x="578" y="150" fill="#3a7a9a">TCP</text>
-    <text class="desc-label" x="578" y="178" fill="#999">Chime command</text>
+    <line class="arr" x1="550" y1="160" x2="718" y2="160" stroke="#3a7a9a" marker-end="url(#a2)"/>
+    <text class="proto-label" x="634" y="148" fill="#3a7a9a">TCP</text>
+    <text class="desc-label" x="634" y="178" fill="#999">Chime command</text>
 
     <!-- Health check: Receiver → Bridge (dashed, small) -->
-    <line class="arr" x1="658" y1="240" x2="500" y2="240" stroke="#aaa" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#a-cache)"/>
-    <text class="desc-label" x="579" y="258" fill="#aaa">Health check → Cache Receiver ID</text>
+    <line class="arr" x1="718" y1="240" x2="552" y2="240" stroke="#aaa" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#a-cache)"/>
+    <text class="desc-label" x="635" y="258" fill="#aaa">Health check → Cache Receiver ID</text>
 
     <!-- ③ Receiver → Chime Bell (RF) -->
-    <line class="arr" x1="830" y1="160" x2="1008" y2="160" stroke="#7a55aa" stroke-dasharray="4,3" marker-end="url(#a3)"/>
-    <text class="proto-label" x="919" y="150" fill="#7a55aa">RF</text>
-    <text class="desc-label" x="919" y="178" fill="#999">433MHz signal</text>
+    <line class="arr" x1="890" y1="160" x2="1098" y2="160" stroke="#7a55aa" stroke-dasharray="4,3" marker-end="url(#a3)"/>
+    <text class="proto-label" x="994" y="148" fill="#7a55aa">RF</text>
+    <text class="desc-label" x="994" y="178" fill="#999">433MHz signal</text>
   </svg>
 
   <!-- Step numbers (top-left of each card) -->
   <div class="step-num" style="left:18px; top:42px; color:#aa5544; border-color:#e0baba;">1</div>
-  <div class="step-num" style="left:260px; top:42px; color:#5555aa; border-color:#b0b0d8;">2</div>
-  <div class="step-num" style="left:652px; top:42px; color:#3a7a9a; border-color:#a0c8d8;">3</div>
-  <div class="step-num" style="left:1002px; top:42px; color:#7a55aa; border-color:#c8b0e0;">4</div>
+  <div class="step-num" style="left:312px; top:42px; color:#5555aa; border-color:#b0b0d8;">2</div>
+  <div class="step-num" style="left:712px; top:42px; color:#3a7a9a; border-color:#a0c8d8;">3</div>
+  <div class="step-num" style="left:1092px; top:42px; color:#7a55aa; border-color:#c8b0e0;">4</div>
 
   <!-- Note -->
-  <div class="note-box" style="left:1005px; top:362px;">
+  <div class="note-box" style="left:1095px; top:362px;">
     Chime bell rings only when RF signal ID matches a pre-registered ID.
   </div>
 
@@ -230,7 +230,7 @@
         </div>
       </div>
     </div>
-    <div class="card-badge">On Robot (NUC)</div>
+    <div class="card-badge">On Robot</div>
   </div>
 
   <!-- ② Bell Signal Bridge -->
