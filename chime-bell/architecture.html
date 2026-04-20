@@ -80,7 +80,7 @@
   .c-chime  .card-badge { background: #f0e8fa; color: #7a55aa; }
 
   /* Config card — bottom row */
-  .c-bsm { left: 310px; top: 370px; width: 338px; height: 120px; border: 1.5px solid #a0c8e0; }
+  .c-bsm { left: 350px; top: 380px; width: 200px; height: 100px; border: 1.5px solid #a0c8e0; }
   .c-bsm .card-title { color: #2a7aaa; }
   .c-bsm .card-badge { background: #e4f0fa; color: #2a7aaa; }
   .bsm-content {
@@ -90,7 +90,7 @@
   .bsm-db { display: flex; flex-direction: column; align-items: center; }
 
   /* Universe card */
-  .c-uni { left: 310px; top: 510px; width: 338px; height: 55px; border: 1.5px solid #c0b0e0; }
+  .c-uni { left: 380px; top: 500px; width: 170px; height: 52px; border: 1.5px solid #c0b0e0; }
   .c-uni .card-title { color: #6a55aa; font-size: 0.7rem; }
   .c-uni .card-badge { background: #f0eef8; color: #6a55aa; }
   .uni-content { display: flex; align-items: center; gap: 12px; }
@@ -181,14 +181,14 @@
     <text class="desc-label" x="944" y="178" fill="#999">433MHz</text>
 
     <!-- BSM → Microservice (one-time fetch) -->
-    <line class="arr" x1="310" y1="410" x2="220" y2="410" stroke="#2a7aaa" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#a-bsm)"/>
-    <text class="desc-label" x="265" y="430" fill="#2a7aaa">gRPC FetchSettings()</text>
-    <text class="desc-label" x="265" y="442" fill="#999">One-time on startup</text>
+    <line class="arr" x1="350" y1="420" x2="220" y2="400" stroke="#2a7aaa" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#a-bsm)"/>
+    <text class="desc-label" x="285" y="438" fill="#2a7aaa">gRPC FetchSettings()</text>
+    <text class="desc-label" x="285" y="450" fill="#999">One-time on startup</text>
 
     <!-- Universe → BSM (Update Setting) -->
-    <line class="arr" x1="464" y1="510" x2="464" y2="492" stroke="#6a55aa" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#a-uni)"/>
-    <text class="proto-label" x="530" y="504" fill="#6a55aa">gRPC</text>
-    <text class="desc-label" x="530" y="517" fill="#999">Update Setting</text>
+    <line class="arr" x1="450" y1="500" x2="450" y2="482" stroke="#6a55aa" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#a-uni)"/>
+    <text class="proto-label" x="505" y="494" fill="#6a55aa">gRPC</text>
+    <text class="desc-label" x="505" y="507" fill="#999">Update Setting</text>
   </svg>
 
   <!-- Step numbers -->
@@ -271,25 +271,19 @@
 
   <!-- BSM (config source, bottom row) -->
   <div class="card c-bsm">
-    <div class="bsm-content">
-      <div style="font-size:2rem;">🧠</div>
-      <div class="bsm-left">
-        <div class="card-title">Bell Signal Manager</div>
-        <div class="card-sub" style="text-align:left; margin-top:4px;">
-          Chime config mapping:<br>
-          (destination, mission_status) → (receiver_id, signal_id)
-        </div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <div style="font-size:1.4rem;">🧠</div>
+      <div>
+        <div class="card-title" style="font-size:0.68rem;">Bell Signal Manager</div>
+        <div class="card-sub" style="font-size:0.44rem;">(dest, status) → (receiver_id, signal_id)</div>
       </div>
-      <div class="bsm-db">
-        <svg width="44" height="32" viewBox="0 0 44 32">
-          <ellipse cx="22" cy="6" rx="18" ry="6" fill="#d0e4f4" stroke="#4a88bb" stroke-width="1.5"/>
-          <rect x="4" y="6" width="36" height="14" fill="#d0e4f4" stroke="none"/>
-          <line x1="4" y1="6" x2="4" y2="20" stroke="#4a88bb" stroke-width="1.5"/>
-          <line x1="40" y1="6" x2="40" y2="20" stroke="#4a88bb" stroke-width="1.5"/>
-          <ellipse cx="22" cy="20" rx="18" ry="6" fill="#d0e4f4" stroke="#4a88bb" stroke-width="1.5"/>
-        </svg>
-        <div style="font-size:0.45rem; font-weight:700; color:#2a6a9a;">MySQL</div>
-      </div>
+      <svg width="32" height="24" viewBox="0 0 32 24" style="flex-shrink:0;">
+        <ellipse cx="16" cy="5" rx="13" ry="5" fill="#d0e4f4" stroke="#4a88bb" stroke-width="1.2"/>
+        <rect x="3" y="5" width="26" height="10" fill="#d0e4f4" stroke="none"/>
+        <line x1="3" y1="5" x2="3" y2="15" stroke="#4a88bb" stroke-width="1.2"/>
+        <line x1="29" y1="5" x2="29" y2="15" stroke="#4a88bb" stroke-width="1.2"/>
+        <ellipse cx="16" cy="15" rx="13" ry="5" fill="#d0e4f4" stroke="#4a88bb" stroke-width="1.2"/>
+      </svg>
     </div>
     <div class="card-badge">Cloud Run</div>
   </div>
