@@ -17,7 +17,7 @@
 
   .diagram {
     position: relative;
-    width: 1300px; height: 560px;
+    width: 1300px; height: 620px;
     background: #fff; border-radius: 16px;
     border: 1.5px solid #dde;
     box-shadow: 0 2px 20px rgba(0,0,0,0.06);
@@ -34,12 +34,13 @@
   }
   /* Main flow row zones (top) */
   .z-robot {
-    left: 12px; top: 14px; width: 228px; height: 340px;
-    border-color: #e0cccc; background: rgba(245,225,225,0.15);
+    left: 14px; top: 24px; width: 224px; height: 324px;
+    border-color: #e0cccc; background: rgba(245,225,225,0.12);
+    z-index: 1;
   }
   .z-robot .zone-label { bottom: 10px; color: #8a6060; }
   .z-cloud {
-    left: 252px; top: 14px; width: 368px; height: 340px;
+    left: 12px; top: 14px; width: 608px; height: 594px;
     border-color: #c8c8e8; background: rgba(220,220,245,0.12);
   }
   .z-cloud .zone-label { bottom: 10px; color: #6a6a9a; }
@@ -49,11 +50,6 @@
   }
   .z-field .zone-label { bottom: 10px; color: #6a8a6a; }
   /* Config row zone (bottom) */
-  .z-config {
-    left: 12px; top: 380px; width: 608px; height: 160px;
-    border-color: #b8c8e0; background: rgba(220,230,245,0.1);
-  }
-  .z-config .zone-label { bottom: 10px; color: #6a7a9a; }
 
   /* ── Cards ── */
   .card {
@@ -93,6 +89,12 @@
   }
   .bsm-left { text-align: left; }
   .bsm-db { display: flex; flex-direction: column; align-items: center; }
+
+  /* Universe card */
+  .c-uni { left: 28px; top: 538px; width: 576px; height: 48px; border: 1.5px solid #c0b0e0; }
+  .c-uni .card-title { color: #6a55aa; font-size: 0.7rem; }
+  .c-uni .card-badge { background: #f0eef8; color: #6a55aa; }
+  .uni-content { display: flex; align-items: center; gap: 12px; }
 
   /* Sub-card styles */
   .inner { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; width: 100%; }
@@ -148,10 +150,9 @@
   <div class="zone z-robot"><div class="zone-label">Robot</div></div>
   <div class="zone z-cloud"><div class="zone-label">Google Cloud Platform</div></div>
   <div class="zone z-field"><div class="zone-label">On-Premise (Restaurant)</div></div>
-  <div class="zone z-config"><div class="zone-label">Config (One-time fetch on startup)</div></div>
 
   <!-- SVG Arrows -->
-  <svg class="arrows" width="1300" height="560">
+  <svg class="arrows" width="1300" height="620">
     <defs>
       <marker id="a1" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#aa5544"/></marker>
       <marker id="a2" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#3a7a9a"/></marker>
@@ -185,6 +186,12 @@
     <line class="arr" x1="126" y1="396" x2="126" y2="338" stroke="#2a7aaa" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#a-bsm)"/>
     <text class="proto-label" x="168" y="368" fill="#2a7aaa">gRPC</text>
     <text class="desc-label" x="168" y="383" fill="#999">FetchSettings()</text>
+
+    <!-- Universe → BSM DB (Update Setting) -->
+    <marker id="a-uni" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#6a55aa"/></marker>
+    <line class="arr" x1="316" y1="556" x2="316" y2="528" stroke="#6a55aa" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#a-uni)"/>
+    <text class="proto-label" x="360" y="544" fill="#6a55aa">gRPC</text>
+    <text class="desc-label" x="360" y="558" fill="#999">Update Setting</text>
   </svg>
 
   <!-- Step numbers -->
@@ -289,6 +296,16 @@
       </div>
     </div>
     <div class="card-badge">Cloud Run</div>
+  </div>
+
+  <!-- Universe -->
+  <div class="card c-uni">
+    <div class="uni-content">
+      <div style="font-size:1.4rem;">🌐</div>
+      <div class="card-title">Universe</div>
+      <div class="card-sub">Admin console — saves bell settings, receiver config, robot group to BSM DB</div>
+    </div>
+    <div class="card-badge">Admin Console</div>
   </div>
 
   <!-- Note -->
