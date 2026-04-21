@@ -656,9 +656,7 @@ function dispatch(ri, roomIdx) {
 
   // SRL-300: YELLOW on departure, auto-off 1s
   setSRL(roomIdx, 'dep-blue');
-  setKitchenSRL('dep-blue');
   setTimeout(() => { if (ROOMS[roomIdx].srlEl.classList.contains('dep-blue')) setSRL(roomIdx, null); }, 1000);
-  setTimeout(() => { if (kitchenSrl.classList.contains('dep-blue')) setKitchenSRL(null); }, 1000);
 
   const action = wasReturning ? 'redirected' : 'dispatched';
   log(`<span class="rn">${rob.name}</span> ${action} → <span class="rm">${room.name}</span> | <span class="bell">SRL-300 Blue</span>`);
@@ -686,8 +684,10 @@ function animate() {
             const ct = rob.target;
             const arrColor = ARR_COLORS[ct];
             setSRL(ct, arrColor);
+            setKitchenSRL(arrColor);
             log(`<span class="rn">${rob.name}</span> arrived at <span class="rm">${ROOMS[ct].name}</span> | <span class="ok">SRL-300 ${ARR_LABELS[ct]}</span>`);
             setTimeout(() => { if (ROOMS[ct].srlEl.classList.contains(arrColor)) setSRL(ct, null); }, 1000);
+            setTimeout(() => { if (kitchenSrl.classList.contains(arrColor)) setKitchenSRL(null); }, 1000);
 
             showReceiveBtn(idx);
           } else {
