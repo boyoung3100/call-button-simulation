@@ -357,6 +357,13 @@
   <div class="kitchen">
     <div class="kitchen-counter"></div>
     <div class="kitchen-label">🍳 Kitchen</div>
+    <!-- Manager chime bell (bottom-right of kitchen) -->
+    <div class="srl300" id="srlKitchen" style="position:absolute; right:16px; bottom:10px;">
+      <div class="srl300-wrap">
+        <img class="srl300-img" src="srl300.png" alt="SRL-300">
+      </div>
+      <div class="srl300-label" style="font-size:0.4rem; color:#556;">Manager</div>
+    </div>
   </div>
 
   <!-- 4 Servi robots with touchscreen panels -->
@@ -544,10 +551,17 @@ function receiveFood(ri) {
 /* ── SRL-300 ── */
 const DEP_COLORS = ['dep-red', 'dep-orange', 'dep-yellow', 'dep-green'];
 const DEP_LABELS = ['Red', 'Orange', 'Yellow', 'Green'];
+const ALL_SRL_CLASSES = ['arr-blue', ...DEP_COLORS];
+const kitchenSrl = document.getElementById('srlKitchen');
+
 function setSRL(ri, state) {
   const el = ROOMS[ri].srlEl;
-  el.classList.remove('arr-blue', ...DEP_COLORS);
+  el.classList.remove(...ALL_SRL_CLASSES);
   if (state) el.classList.add(state);
+}
+function setKitchenSRL(state) {
+  kitchenSrl.classList.remove(...ALL_SRL_CLASSES);
+  if (state) kitchenSrl.classList.add(state);
 }
 
 /* ── Orthogonal path ── */
@@ -650,7 +664,9 @@ function dispatch(ri, roomIdx) {
   // SRL-300: YELLOW on departure, auto-off 1s
   const depColor = DEP_COLORS[roomIdx];
   setSRL(roomIdx, depColor);
+  setKitchenSRL(depColor);
   setTimeout(() => { if (ROOMS[roomIdx].srlEl.classList.contains(depColor)) setSRL(roomIdx, null); }, 1000);
+  setTimeout(() => { if (kitchenSrl.classList.contains(depColor)) setKitchenSRL(null); }, 1000);
 
   const action = wasReturning ? 'redirected' : 'dispatched';
   log(`<span class="rn">${rob.name}</span> ${action} → <span class="rm">${room.name}</span> | <span class="bell">SRL-300 ${DEP_LABELS[roomIdx]}</span>`);
@@ -677,8 +693,10 @@ function animate() {
             // SRL-300: GREEN on arrival, auto-off 1s
             const ct = rob.target;
             setSRL(ct, 'arr-blue');
+            setKitchenSRL('arr-blue');
             log(`<span class="rn">${rob.name}</span> arrived at <span class="rm">${ROOMS[ct].name}</span> | <span class="ok">SRL-300 Blue</span>`);
             setTimeout(() => { if (ROOMS[ct].srlEl.classList.contains('arr-blue')) setSRL(ct, null); }, 1000);
+            setTimeout(() => { if (kitchenSrl.classList.contains('arr-blue')) setKitchenSRL(null); }, 1000);
 
             showReceiveBtn(idx);
           } else {
