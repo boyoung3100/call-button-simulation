@@ -113,57 +113,49 @@
     text-transform: uppercase; letter-spacing: 1px;
   }
 
-  /* SRL-300 Departed colors (per room: red, orange, yellow, green) */
-  .srl300.dep-red .srl300-wrap {
+  /* SRL-300 Departed (blue, all rooms) */
+  .srl300.dep-blue .srl300-wrap {
+    background: rgba(50, 120, 255, 0.35);
+    box-shadow: 0 0 24px rgba(50, 120, 255, 0.7), 0 0 50px rgba(50, 120, 255, 0.35);
+    animation: srl-pulse-blue 0.5s ease-in-out infinite;
+  }
+  .srl300.dep-blue .srl300-img { filter: brightness(1.8) saturate(2.5) hue-rotate(180deg); }
+  @keyframes srl-pulse-blue {
+    0%,100% { box-shadow: 0 0 24px rgba(50,120,255,0.7), 0 0 50px rgba(50,120,255,0.35); }
+    50% { box-shadow: 0 0 36px rgba(50,120,255,0.9), 0 0 70px rgba(50,120,255,0.5); }
+  }
+
+  /* SRL-300 Arrived (per room: red, orange, yellow, green) */
+  .srl300.arr-red .srl300-wrap {
     background: rgba(255, 50, 50, 0.35);
     box-shadow: 0 0 24px rgba(255, 50, 50, 0.7), 0 0 50px rgba(255, 50, 50, 0.35);
-    animation: srl-pulse-red 0.5s ease-in-out infinite;
   }
-  .srl300.dep-red .srl300-img { filter: brightness(1.8) saturate(2.5) sepia(1) hue-rotate(-30deg); }
-  @keyframes srl-pulse-red {
-    0%,100% { box-shadow: 0 0 24px rgba(255,50,50,0.7), 0 0 50px rgba(255,50,50,0.35); }
-    50% { box-shadow: 0 0 36px rgba(255,50,50,0.9), 0 0 70px rgba(255,50,50,0.5); }
-  }
+  .srl300.arr-red .srl300-img { filter: brightness(1.8) saturate(2.5) sepia(1) hue-rotate(-30deg); }
 
-  .srl300.dep-orange .srl300-wrap {
+  .srl300.arr-orange .srl300-wrap {
     background: rgba(255, 160, 30, 0.35);
     box-shadow: 0 0 24px rgba(255, 160, 30, 0.7), 0 0 50px rgba(255, 160, 30, 0.35);
-    animation: srl-pulse-orange 0.5s ease-in-out infinite;
   }
-  .srl300.dep-orange .srl300-img { filter: brightness(1.8) saturate(2) sepia(1) hue-rotate(10deg); }
-  @keyframes srl-pulse-orange {
-    0%,100% { box-shadow: 0 0 24px rgba(255,160,30,0.7), 0 0 50px rgba(255,160,30,0.35); }
-    50% { box-shadow: 0 0 36px rgba(255,160,30,0.9), 0 0 70px rgba(255,160,30,0.5); }
-  }
+  .srl300.arr-orange .srl300-img { filter: brightness(1.8) saturate(2) sepia(1) hue-rotate(10deg); }
 
-  .srl300.dep-yellow .srl300-wrap {
+  .srl300.arr-yellow .srl300-wrap {
     background: rgba(255, 220, 0, 0.35);
     box-shadow: 0 0 24px rgba(255, 220, 0, 0.7), 0 0 50px rgba(255, 220, 0, 0.35);
-    animation: srl-pulse-yellow 0.5s ease-in-out infinite;
   }
-  .srl300.dep-yellow .srl300-img { filter: brightness(1.8) saturate(2) sepia(1) hue-rotate(-5deg); }
-  @keyframes srl-pulse-yellow {
-    0%,100% { box-shadow: 0 0 24px rgba(255,220,0,0.7), 0 0 50px rgba(255,220,0,0.35); }
-    50% { box-shadow: 0 0 36px rgba(255,220,0,0.9), 0 0 70px rgba(255,220,0,0.5); }
-  }
+  .srl300.arr-yellow .srl300-img { filter: brightness(1.8) saturate(2) sepia(1) hue-rotate(-5deg); }
 
-  .srl300.dep-green .srl300-wrap {
+  .srl300.arr-green .srl300-wrap {
     background: rgba(0, 200, 80, 0.35);
     box-shadow: 0 0 24px rgba(0, 200, 80, 0.7), 0 0 50px rgba(0, 200, 80, 0.35);
-    animation: srl-pulse-green 0.5s ease-in-out infinite;
   }
-  .srl300.dep-green .srl300-img { filter: brightness(1.8) saturate(2.5) hue-rotate(70deg); }
-  @keyframes srl-pulse-green {
-    0%,100% { box-shadow: 0 0 24px rgba(0,200,80,0.7), 0 0 50px rgba(0,200,80,0.35); }
-    50% { box-shadow: 0 0 36px rgba(0,200,80,0.9), 0 0 70px rgba(0,200,80,0.5); }
-  }
+  .srl300.arr-green .srl300-img { filter: brightness(1.8) saturate(2.5) hue-rotate(70deg); }
 
-  /* SRL-300 Arrived (blue) */
-  .srl300.arr-blue .srl300-wrap {
-    background: rgba(50, 120, 255, 0.3);
-    box-shadow: 0 0 24px rgba(50, 120, 255, 0.7), 0 0 50px rgba(50, 120, 255, 0.35);
+  /* SRL-300 Return to kitchen (black/dark) — manager bell only */
+  .srl300.ret-black .srl300-wrap {
+    background: rgba(30, 30, 30, 0.6);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5), 0 0 40px rgba(30, 30, 30, 0.3);
   }
-  .srl300.arr-blue .srl300-img { filter: brightness(1.8) saturate(2.5) hue-rotate(180deg); }
+  .srl300.ret-black .srl300-img { filter: brightness(0.8) saturate(0); }
 
   /* Kitchen */
   .kitchen {
@@ -308,7 +300,7 @@
 <body>
 
 <h1>Chime Bell Robot Dispatch Simulation</h1>
-<p class="subtitle">Select a destination room — SRL-300 departure: R1 Red, R2 Orange, R3 Yellow, R4 Green / arrival: Blue</p>
+<p class="subtitle">Departure: Blue / Arrival: R1 Red, R2 Orange, R3 Yellow, R4 Green / Return to kitchen: Black (manager bell only)</p>
 
 <div class="controls">
   <button class="btn-auto" id="autoBtn" onclick="toggleAuto()">Start Auto Mode</button>
@@ -426,11 +418,12 @@
 
 <div class="legend">
   <div class="legend-item"><div class="legend-dot" style="background:#555;"></div> SRL-300 Off</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#ff3232;"></div> R1 Dep</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#ffa020;"></div> R2 Dep</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#ffdd00;"></div> R3 Dep</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#00c850;"></div> R4 Dep</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#3278ff;"></div> Arrived (Blue)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#3278ff;"></div> Departed (Blue)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ff3232;"></div> R1 Arrived</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ffa020;"></div> R2 Arrived</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ffdd00;"></div> R3 Arrived</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#00c850;"></div> R4 Arrived</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#222;"></div> Returned (Black)</div>
   <div class="legend-item"><div class="legend-dot" style="background:#4a7aff;border-radius:3px;"></div> Servi A</div>
   <div class="legend-item"><div class="legend-dot" style="background:#ff6b9d;border-radius:3px;"></div> Servi B</div>
   <div class="legend-item"><div class="legend-dot" style="background:#4de8c2;border-radius:3px;"></div> Servi C</div>
@@ -549,9 +542,9 @@ function receiveFood(ri) {
 
 
 /* ── SRL-300 ── */
-const DEP_COLORS = ['dep-red', 'dep-orange', 'dep-yellow', 'dep-green'];
-const DEP_LABELS = ['Red', 'Orange', 'Yellow', 'Green'];
-const ALL_SRL_CLASSES = ['arr-blue', ...DEP_COLORS];
+const ARR_COLORS = ['arr-red', 'arr-orange', 'arr-yellow', 'arr-green'];
+const ARR_LABELS = ['Red', 'Orange', 'Yellow', 'Green'];
+const ALL_SRL_CLASSES = ['dep-blue', 'ret-black', ...ARR_COLORS];
 const kitchenSrl = document.getElementById('srlKitchen');
 
 function setSRL(ri, state) {
@@ -662,14 +655,13 @@ function dispatch(ri, roomIdx) {
   showFood(ri);
 
   // SRL-300: YELLOW on departure, auto-off 1s
-  const depColor = DEP_COLORS[roomIdx];
-  setSRL(roomIdx, depColor);
-  setKitchenSRL(depColor);
-  setTimeout(() => { if (ROOMS[roomIdx].srlEl.classList.contains(depColor)) setSRL(roomIdx, null); }, 1000);
-  setTimeout(() => { if (kitchenSrl.classList.contains(depColor)) setKitchenSRL(null); }, 1000);
+  setSRL(roomIdx, 'dep-blue');
+  setKitchenSRL('dep-blue');
+  setTimeout(() => { if (ROOMS[roomIdx].srlEl.classList.contains('dep-blue')) setSRL(roomIdx, null); }, 1000);
+  setTimeout(() => { if (kitchenSrl.classList.contains('dep-blue')) setKitchenSRL(null); }, 1000);
 
   const action = wasReturning ? 'redirected' : 'dispatched';
-  log(`<span class="rn">${rob.name}</span> ${action} → <span class="rm">${room.name}</span> | <span class="bell">SRL-300 ${DEP_LABELS[roomIdx]}</span>`);
+  log(`<span class="rn">${rob.name}</span> ${action} → <span class="rm">${room.name}</span> | <span class="bell">SRL-300 Blue</span>`);
 }
 
 /* ── Animation ── */
@@ -692,11 +684,10 @@ function animate() {
 
             // SRL-300: GREEN on arrival, auto-off 1s
             const ct = rob.target;
-            setSRL(ct, 'arr-blue');
-            setKitchenSRL('arr-blue');
-            log(`<span class="rn">${rob.name}</span> arrived at <span class="rm">${ROOMS[ct].name}</span> | <span class="ok">SRL-300 Blue</span>`);
-            setTimeout(() => { if (ROOMS[ct].srlEl.classList.contains('arr-blue')) setSRL(ct, null); }, 1000);
-            setTimeout(() => { if (kitchenSrl.classList.contains('arr-blue')) setKitchenSRL(null); }, 1000);
+            const arrColor = ARR_COLORS[ct];
+            setSRL(ct, arrColor);
+            log(`<span class="rn">${rob.name}</span> arrived at <span class="rm">${ROOMS[ct].name}</span> | <span class="ok">SRL-300 ${ARR_LABELS[ct]}</span>`);
+            setTimeout(() => { if (ROOMS[ct].srlEl.classList.contains(arrColor)) setSRL(ct, null); }, 1000);
 
             showReceiveBtn(idx);
           } else {
@@ -706,6 +697,10 @@ function animate() {
             updateStatus(idx, 'idle', 'Idle');
             setPanelEnabled(idx, true);
             showFood(idx); // back at kitchen, food loaded
+            // Manager bell: black on return
+            setKitchenSRL('ret-black');
+            log(`<span class="rn">${rob.name}</span> returned to kitchen | <span class="bell">Manager SRL-300 Black</span>`);
+            setTimeout(() => { if (kitchenSrl.classList.contains('ret-black')) setKitchenSRL(null); }, 1000);
           }
         }
       } else {
